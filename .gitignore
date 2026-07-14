@@ -1,0 +1,39 @@
+# Environnement Python
+# Python environment
+.python-version.bak
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Données et artefacts générés (rejoués par le pipeline, non versionnés)
+# Generated data and artifacts (replayed by the pipeline, not versioned)
+data/enriched/*
+!data/enriched/.gitkeep
+*.duckdb
+*.duckdb.wal
+pipeline_state.json
+lineage.json
+
+# ML
+mlruns/
+mlflow.db
+ml/artifacts/
+
+# dbt
+dbt_project/target/
+dbt_project/logs/
+dbt_project/dbt_packages/
+dbt_project/.user.yml
+
+# Logs applicatifs
+# Application logs
+logs/*.log*
+!logs/.gitkeep
+
+# Divers
+# Miscellaneous
+.DS_Store
+.env
+*.log
