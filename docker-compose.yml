@@ -1,0 +1,21 @@
+services:
+  dashboard:
+    build: .
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+
+  mcp-server:
+    build: .
+    command: ["python3", "mcp/databank_mcp_server.py"]
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    profiles:
+      - mcp

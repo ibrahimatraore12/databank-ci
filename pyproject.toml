@@ -1,0 +1,19 @@
+[project]
+name = "databank-ci"
+version = "1.0.0"
+description = "dataBank CI Customer 360 — plateforme analytics engineering de bout en bout"
+requires-python = ">=3.11"
+
+[tool.flake8]
+max-line-length = 120
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "dbt_project/target",
+    "dbt_project/dbt_packages",
+    "notebooks",
+    "ml/artifacts",
+    "mlruns",
+]
+extend-ignore = ["E203", "W503"]
