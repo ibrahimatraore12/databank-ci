@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: int_customer_recency
+    description: Récence transactionnelle par client (jours depuis la dernière transaction)
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: int_customer_transaction_trend
+    description: Tendance d'activité transactionnelle par client (30 derniers jours vs 30 jours précédents)
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: int_customer_complaints
+    description: Agrégats de réclamations par client
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: int_customer_digital_score
+    description: Score digital brut par client (0 à 3 canaux activés)
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: int_customer_products
+    description: Nombre de produits détenus par client (comptes + cartes)
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]

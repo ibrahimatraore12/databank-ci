@@ -1,0 +1,7 @@
+databank_ci:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: databank_ci.duckdb
+      threads: 4

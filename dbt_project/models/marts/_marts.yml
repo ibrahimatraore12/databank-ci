@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: customer_360
+    description: Table Gold Customer 360 — vue unique du client, risque composite et 5 classes ontologiques
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: segment
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Mass', 'Affluent', 'Premier', 'Youth']
+      - name: risk_band
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Low', 'Medium', 'High']
+      - name: risque_composite
+        tests: [not_null]
+      - name: is_high_value_at_risk
+        tests: [not_null]
+      - name: is_digitally_dormant_salary
+        tests: [not_null]
+      - name: is_complaints_churn_risk
+        tests: [not_null]
+      - name: is_cross_sell_target
+        tests: [not_null]
+      - name: is_salary_upsell_opportunity
+        tests: [not_null]
+
+  - name: customer_segments
+    description: Agrégats de pilotage par segment client
+    columns:
+      - name: segment
+        tests: [unique, not_null]
+
+  - name: nba
+    description: Action recommandée (Next Best Action) par client
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('customer_360')
+                field: customer_id

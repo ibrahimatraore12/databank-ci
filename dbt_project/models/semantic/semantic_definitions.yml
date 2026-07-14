@@ -1,0 +1,65 @@
+version: 2
+
+# Couche sémantique : traduit les colonnes techniques du mart customer_360 en
+# concepts métier. Mappe les 5 classes ontologiques du portefeuille.
+# Semantic layer: translates the technical columns of the customer_360 mart
+# into business concepts. Maps the portfolio's 5 ontology classes.
+
+semantic_models:
+  - name: customer_360_semantic
+    description: >
+      Couche sémantique du Customer 360, utilisée par le dashboard et le
+      serveur MCP pour ne jamais exposer de nom de colonne technique.
+    model: ref('customer_360')
+    defaults:
+      agg_time_dimension: updated_at
+    entities:
+      - name: customer_id
+        type: primary
+    dimensions:
+      - name: segment
+        type: categorical
+        description: "Segment commercial du client (Mass, Affluent, Premier, Youth)"
+      - name: risk_band
+        type: categorical
+        description: "Niveau de risque crédit déclaré du client"
+      - name: is_high_value_at_risk
+        type: categorical
+        description: >
+          Concept 1 — Client à forte valeur (Premier ou Affluent) montrant des
+          signaux précoces de désengagement (recency > 60 jours)
+      - name: is_digitally_dormant_salary
+        type: categorical
+        description: >
+          Concept 2 — Client au salaire domicilié mais quasiment absent des
+          canaux digitaux (score digital <= 1 sur 3)
+      - name: is_complaints_churn_risk
+        type: categorical
+        description: >
+          Concept 3 — Client avec une réclamation ouverte et une activité
+          transactionnelle en baisse
+      - name: is_cross_sell_target
+        type: categorical
+        description: "Concept 4 — Client sans carte bancaire, cible prioritaire de cross-sell"
+      - name: is_salary_upsell_opportunity
+        type: categorical
+        description: >
+          Concept 5 — Client à revenu mensuel élevé dont le salaire n'est pas
+          domicilié chez dataBank CI
+      - name: updated_at
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: risque_composite
+        agg: average
+        expr: risque_composite
+        description: "Score de risque composite 0-100 (pondération documentée dans docs/decisions.md)"
+      - name: score_digital
+        agg: average
+        expr: score_digital
+        description: "Score d'adoption digitale brut (0 à 3 canaux activés)"
+      - name: nb_clients
+        agg: count
+        expr: customer_id
+        description: "Nombre de clients"

@@ -1,0 +1,38 @@
+name: 'databank_ci'
+version: '1.0.0'
+config-version: 2
+
+profile: 'databank_ci'
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # Graine fixée pour l'idempotence de tout le projet (règle 11)
+  # Seed fixed for idempotence across the whole project (rule 11)
+  seed: 42
+  loan_dpd_threshold_days: 15
+  # Pondération du score de risque composite (H1-H4, voir docs/decisions.md)
+  # Composite risk score weighting (H1-H4, see docs/decisions.md)
+  rules_weight_recency: 0.40
+  rules_weight_complaints: 0.30
+  rules_weight_digital: 0.20
+  rules_weight_trend: 0.10
+  salary_upsell_income_threshold_xof: 500000
+
+models:
+  databank_ci:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts
+    semantic:
+      +materialized: view
+      +schema: semantic

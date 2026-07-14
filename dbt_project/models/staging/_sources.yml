@@ -1,0 +1,25 @@
+version: 2
+
+sources:
+  - name: bronze
+    schema: main
+    description: Couche Bronze — données brutes chargées depuis starter_dataset.xlsx et le générateur synthétique
+    tables:
+      - name: bronze_customers
+      - name: bronze_synthetic_customers
+      - name: bronze_accounts
+      - name: bronze_synthetic_accounts
+      - name: bronze_transactions
+      - name: bronze_synthetic_transactions
+      - name: bronze_loans
+      - name: bronze_synthetic_loans
+      - name: bronze_cards
+      - name: bronze_synthetic_cards
+      - name: bronze_branches
+      - name: bronze_channels
+      - name: bronze_interactions
+      - name: bronze_synthetic_interactions
+      - name: bronze_complaints
+      - name: bronze_synthetic_complaints
+      - name: bronze_offers
+      - name: bronze_synthetic_offers

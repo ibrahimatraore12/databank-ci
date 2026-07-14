@@ -1,0 +1,230 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: Clients (réels + synthétiques), typage explicite, booléens normalisés
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: segment
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Mass', 'Affluent', 'Premier', 'Youth']
+      - name: risk_band
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Low', 'Medium', 'High']
+      - name: kyc_level
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Enhanced', 'Standard']
+      - name: gender
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['F', 'M']
+      - name: marital_status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Married', 'Single']
+      - name: preferred_channel
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['ATM', 'Branch', 'Internet Banking', 'Mobile App']
+
+  - name: stg_accounts
+    description: Comptes (réels + synthétiques), avec salary_domiciled_corrige
+    columns:
+      - name: account_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: account_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Current', 'Premier Current', 'Savings', 'Student']
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Dormant', 'Open']
+      - name: currency
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['XOF']
+
+  - name: stg_transactions
+    description: Transactions (réelles + synthétiques)
+    columns:
+      - name: txn_id
+        tests: [unique, not_null]
+      - name: account_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_id
+      - name: customer_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: txn_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['atm_withdrawal', 'bill_payment', 'card_purchase', 'cash_deposit',
+                         'loan_repayment', 'mobilemoney_cashout', 'p2p_transfer',
+                         'salary_credit', 'transfer_in', 'transfer_out']
+      - name: direction
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['IN', 'OUT']
+
+  - name: stg_loans
+    description: Prêts (réels + synthétiques), avec status_corrige selon le DPD réel
+    columns:
+      - name: loan_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Current', 'Delinquent', 'Watchlist']
+      - name: status_corrige
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Current', 'Delinquent', 'Watchlist']
+      - name: loan_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Asset Finance', 'Personal Loan', 'Salary Advance']
+
+  - name: stg_cards
+    description: Cartes (réelles + synthétiques)
+    columns:
+      - name: card_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: account_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_id
+      - name: card_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Credit', 'Debit', 'Prepaid']
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Active', 'Blocked', 'Expired']
+
+  - name: stg_branches
+    description: Référentiel agences (réel uniquement)
+    columns:
+      - name: branch_id
+        tests: [unique, not_null]
+      - name: branch_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Flagship', 'Regional', 'Urban']
+
+  - name: stg_channels
+    description: Référentiel canaux (réel uniquement)
+    columns:
+      - name: channel_id
+        tests: [unique, not_null]
+      - name: channel_group
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Digital', 'Partner', 'Payment', 'Physical', 'Service']
+
+  - name: stg_interactions
+    description: Interactions clients (réelles + synthétiques)
+    columns:
+      - name: interaction_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: sentiment
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Negative', 'Neutral', 'Positive']
+
+  - name: stg_complaints
+    description: Réclamations (réelles + synthétiques)
+    columns:
+      - name: complaint_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: severity
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Low', 'Medium', 'High']
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Open', 'Closed']
+
+  - name: stg_offers
+    description: Offres commerciales (réelles + synthétiques)
+    columns:
+      - name: offer_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: offer_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Card upgrade', 'Digital activation', 'Personal loan',
+                         'Savings product', 'Travel card']

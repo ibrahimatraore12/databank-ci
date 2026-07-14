@@ -1,0 +1,35 @@
+version: 2
+
+# Définition de tous les KPIs métier exposés au dashboard et au serveur MCP
+# Definition of all business KPIs exposed to the dashboard and the MCP server
+
+models:
+  - name: metricflow_time_spine
+    description: Modèle technique requis par le semantic layer dbt (une ligne par jour)
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day
+
+metrics:
+  - name: risque_composite_moyen
+    description: "Score de risque composite moyen du portefeuille (0-100)"
+    label: "Risque composite moyen"
+    type: simple
+    type_params:
+      measure: risque_composite
+
+  - name: nombre_clients
+    description: "Nombre total de clients du portefeuille (réels + synthétiques)"
+    label: "Nombre de clients"
+    type: simple
+    type_params:
+      measure: nb_clients
+
+  - name: engagement_digital_moyen
+    description: "Score digital moyen du portefeuille (0 à 3 canaux activés)"
+    label: "Engagement digital moyen"
+    type: simple
+    type_params:
+      measure: score_digital
