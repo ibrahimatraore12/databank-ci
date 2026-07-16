@@ -34,7 +34,7 @@ starter_dataset.xlsx (10 tables)
    dbt_project/models/marts        (Gold : customer_360, customer_segments, nba)
         │
         ├──► dashboard/  (Streamlit, 8 pages, FR/EN)
-        ├──► mcp/        (serveur MCP, 5 outils read-only)
+        ├──► mcp_server/ (serveur MCP, 5 outils read-only)
         └──► ml/         (score de règles + modèles ML comparés)
 ```
 
@@ -68,7 +68,7 @@ python3 pipelines/run_ml_pipeline.py
 streamlit run dashboard/APP.py
 
 # 5. Serveur MCP
-python3 mcp/databank_mcp_server.py
+python3 mcp_server/databank_mcp_server.py
 ```
 
 ## Tests
@@ -90,7 +90,7 @@ databank-ci/
 ├── dbt_project/          staging / intermediate / marts / semantic
 ├── ml/                   règles métier, données, modèles, comparaison
 ├── dashboard/            application Streamlit (8 pages, i18n FR/EN)
-├── mcp/                  serveur MCP (5 outils read-only)
+├── mcp_server/            serveur MCP (5 outils read-only)
 ├── pipelines/            orchestration (données, ML)
 ├── scripts/              déploiement
 └── tests/                pytest

@@ -5,13 +5,17 @@ services:
       - "8501:8501"
     env_file:
       - .env
+    environment:
+      - MCP_SERVER_URL=http://mcp-server:8080/mcp
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
 
   mcp-server:
     build: .
-    command: ["python3", "mcp/databank_mcp_server.py"]
+    command: ["python3", "mcp_server/databank_mcp_server.py"]
+    environment:
+      - MCP_TRANSPORT=streamable-http
     env_file:
       - .env
     volumes:
