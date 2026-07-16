@@ -13,6 +13,21 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import streamlit as st  # noqa: E402
 
 from components.ui import afficher_selecteur_langue, t  # noqa: E402
+from src.storage_sync import telecharger_depuis_gcs  # noqa: E402
+
+
+@st.cache_resource
+def _synchroniser_donnees_au_demarrage() -> bool:
+    # Une seule fois par instance (cache process-global, pas par session ni par
+    # page) : Streamlit ré-exécute APP.py en entier à chaque interaction, donc un
+    # appel nu ici tournerait à chaque clic sans ce cache
+    # Once per instance only (process-global cache, not per session or page):
+    # Streamlit re-executes APP.py in full on every interaction, so a bare call
+    # here would run on every click without this cache
+    return telecharger_depuis_gcs()
+
+
+_synchroniser_donnees_au_demarrage()
 
 with st.sidebar:
     afficher_selecteur_langue()

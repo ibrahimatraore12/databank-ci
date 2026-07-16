@@ -12,17 +12,33 @@
 # when deployed to Cloud Run, driven by the MCP_TRANSPORT and PORT variables
 
 import os
+import sys
 
-from mcp.server.fastmcp import FastMCP
-from starlette.responses import JSONResponse
+# Nécessaire ici (contrairement à tools/*.py qui l'ajoutent déjà chacun) car ce
+# fichier importe src.storage_sync avant tout import de tools.*, qui est ce qui
+# ajoutait jusqu'ici la racine du projet à sys.path comme effet de bord
+# Needed here (unlike tools/*.py, which each already add it) because this file
+# imports src.storage_sync before any tools.* import, which is what used to add
+# the project root to sys.path as a side effect
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tools.complaints import get_complaint_analysis
-from tools.customers import get_at_risk_customers, get_customer_profile
-from tools.portfolio import get_cross_sell_candidates, get_portfolio_kpis
+from mcp.server.fastmcp import FastMCP  # noqa: E402
+from starlette.responses import JSONResponse  # noqa: E402
+
+from src.storage_sync import telecharger_depuis_gcs  # noqa: E402
+from tools.complaints import get_complaint_analysis  # noqa: E402
+from tools.customers import get_at_risk_customers, get_customer_profile  # noqa: E402
+from tools.portfolio import get_cross_sell_candidates, get_portfolio_kpis  # noqa: E402
 
 TRANSPORT = os.environ.get("MCP_TRANSPORT", "stdio")
 PORT = int(os.environ.get("PORT", 8080))
 API_KEY = os.environ.get("MCP_API_KEY")
+
+# Processus long-vivant (pas de ré-exécution répétée comme Streamlit) : un
+# appel simple au chargement suffit, pas besoin d'équivalent à st.cache_resource
+# Long-lived process (no repeated re-execution like Streamlit): a plain call
+# at load time is enough, no st.cache_resource equivalent needed
+telecharger_depuis_gcs()
 
 serveur = FastMCP("databank-ci", host="0.0.0.0", port=PORT)
 

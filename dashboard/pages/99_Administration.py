@@ -16,6 +16,7 @@ import config  # noqa: E402
 from components.ui import (  # noqa: E402
     afficher_entete, afficher_etapes_pipeline, afficher_pied_de_page, format_run_id, t,
 )
+from src.logger import log_event  # noqa: E402
 
 st.set_page_config(page_title="Administration", page_icon="🏦", layout="wide")
 
@@ -73,17 +74,22 @@ def valider_fichier_uploade(fichier) -> list:
     return rapports
 
 
-def relancer_pipeline_complet(fichier) -> None:
+def relancer_pipeline_complet(fichier) -> bool:
     # Écrit le fichier uploadé à la place du fichier source, puis rejoue tout le
     # pipeline dans le processus courant : ingestion+enrichissement (Python),
     # dbt run (sous-processus, même commande que le Dockerfile), puis ML.
-    # Effet confiné à l'instance Cloud Run en cours — rien n'est persistant
+    # Persiste ensuite le résultat sur GCS pour que ça survive au redémarrage de
+    # cette instance et soit repris par les autres — un échec de cette dernière
+    # étape est logué mais ne fait pas échouer le recalcul (déjà réel localement)
     # Writes the uploaded file over the source file, then replays the whole
     # pipeline in the current process: ingestion+enrichment (Python), dbt run
-    # (subprocess, same command as the Dockerfile), then ML. Effect confined
-    # to the current Cloud Run instance — nothing is persistent
+    # (subprocess, same command as the Dockerfile), then ML. Then persists the
+    # result to GCS so it survives this instance's restart and is picked up by
+    # the others — a failure of this last step is logged but doesn't fail the
+    # recompute (already real locally)
     from pipelines.run_ml_pipeline import run_ml_pipeline
     from pipelines.run_pipeline import run_pipeline
+    from src.storage_sync import televerser_vers_gcs
 
     fichier.seek(0)
     with open(config.SOURCE_EXCEL_PATH, "wb") as f:
@@ -100,6 +106,13 @@ def relancer_pipeline_complet(fichier) -> None:
         raise RuntimeError(resultat.stderr[-1000:] or resultat.stdout[-1000:])
 
     run_ml_pipeline()
+
+    try:
+        televerser_vers_gcs()
+        return True
+    except Exception as erreur:
+        log_event("pipeline", "ERROR", "[GCS][SYNC] Persistance échouée après recalcul", {"erreur": str(erreur)})
+        return False
 
 
 def afficher_derniere_lignes_log(chemin: str, n: int = 20) -> None:
@@ -175,8 +188,11 @@ if fichier_uploade is not None:
         if st.button(t("recalculer_maintenant")):
             try:
                 with st.spinner(t("recalcul_en_cours")):
-                    relancer_pipeline_complet(fichier_uploade)
-                st.success(t("recalcul_succes"))
+                    persiste = relancer_pipeline_complet(fichier_uploade)
+                if persiste:
+                    st.success(t("recalcul_succes"))
+                else:
+                    st.warning(t("recalcul_succes_local_seulement"))
             except Exception as erreur:
                 st.error(t("recalcul_echec"))
                 st.code(str(erreur)[:1000], language="text")

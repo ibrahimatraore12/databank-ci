@@ -31,6 +31,7 @@ def update_pipeline_state(step: str, status: str) -> None:
     state.setdefault("steps", {})
     state["steps"][step] = status
     state["last_updated"] = datetime.now(timezone.utc).isoformat()
+    state["schema_version"] = config.DATA_SCHEMA_VERSION
 
     with open(config.PIPELINE_STATE_PATH, "w") as f:
         json.dump(state, f, indent=2, ensure_ascii=False)

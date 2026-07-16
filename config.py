@@ -22,6 +22,14 @@ SOURCE_SHEETS = [
     "Branches", "Channels", "Interactions", "Complaints", "Offers",
 ]
 
+# Incrémenter uniquement quand un changement de schéma dbt (nouvelle colonne
+# dans un mart, etc.) rend un ancien pipeline_state.json/databank_ci.duckdb
+# restauré depuis GCS incompatible avec le code courant — voir src/storage_sync.py
+# Bump only when a dbt schema change (new mart column, etc.) makes an older
+# pipeline_state.json/databank_ci.duckdb restored from GCS incompatible with
+# the current code — see src/storage_sync.py
+DATA_SCHEMA_VERSION = 1
+
 # Idempotence : graine fixée partout (dbt seed, split ML, génération synthétique)
 # Idempotence: seed fixed everywhere (dbt seed, ML split, synthetic generation)
 RANDOM_SEED = 42
