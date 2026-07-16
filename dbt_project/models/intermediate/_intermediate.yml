@@ -26,3 +26,23 @@ models:
     columns:
       - name: customer_id
         tests: [unique, not_null]
+  - name: int_customer_balance
+    description: Solde total et base de solde moyen 90j agrégés par client, tous comptes confondus
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: int_customer_nbi
+    description: NBI estimé par client (formule UEMOA standard, voir docs/decisions.md)
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: int_customer_channel
+    description: Canal bancaire le plus utilisé par client (nombre de transactions par canal)
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: int_customer_loans
+    description: Retard de paiement maximum observé par client, tous prêts confondus
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]

@@ -21,6 +21,11 @@ vars:
   rules_weight_digital: 0.20
   rules_weight_trend: 0.10
   salary_upsell_income_threshold_xof: 500000
+  # Formule NBI estimé (standard UEMOA simplifié), miroir de config.py
+  # Estimated NBI formula (simplified UEMOA standard), mirrors config.py
+  nbi_balance_rate: 0.035
+  nbi_per_transaction_xof: 500
+  nbi_per_product_xof: 15000
 
 models:
   databank_ci:

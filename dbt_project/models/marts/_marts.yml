@@ -28,6 +28,18 @@ models:
         tests: [not_null]
       - name: is_salary_upsell_opportunity
         tests: [not_null]
+      - name: solde_total_xof
+        tests: [not_null]
+      - name: nbi_estime_xof
+        tests: [not_null]
+      - name: nb_txn_30j
+        tests: [not_null]
+      - name: nb_txn_90j
+        tests: [not_null]
+      - name: dpd_max
+        tests: [not_null]
+      - name: anciennete_jours
+        tests: [not_null]
 
   - name: customer_segments
     description: Agrégats de pilotage par segment client

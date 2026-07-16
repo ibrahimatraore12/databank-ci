@@ -3,7 +3,11 @@
 -- Gold Customer 360 table: single customer view combining profile, behavior,
 -- composite risk score, and business ontology classes
 
-with base as (
+with date_reference as (
+    select max(txn_datetime) as date_ref from {{ ref('stg_transactions') }}
+),
+
+base as (
     select
         c.customer_id,
         c.full_name,
@@ -19,6 +23,9 @@ with base as (
         c.is_synthetic,
         r.recency_jours,
         t.tendance_transactions,
+        t.nb_txn_recent_30j as nb_txn_30j,
+        t.nb_txn_90j,
+        t.tendance_3m,
         cp.nb_reclamations_ouvertes,
         cp.nb_reclamations_total,
         cp.nb_reclamations_severite_haute,
@@ -26,16 +33,27 @@ with base as (
         p.nb_comptes,
         p.nb_cartes,
         p.nb_produits_total,
+        bal.solde_total_xof,
+        bal.avg_balance_90d_total_xof as avg_balance_90d_xof,
+        nbi.nbi_estime_xof,
+        ch.canal_majoritaire,
+        ln.dpd_max,
+        date_diff('day', c.onboarding_date, dr.date_ref) as anciennete_jours,
         exists (
             select 1 from {{ ref('stg_accounts') }} a
             where a.customer_id = c.customer_id and a.salary_domiciled_corrige
         ) as salaire_domicilie
     from {{ ref('stg_customers') }} c
+    cross join date_reference dr
     left join {{ ref('int_customer_recency') }} r on c.customer_id = r.customer_id
     left join {{ ref('int_customer_transaction_trend') }} t on c.customer_id = t.customer_id
     left join {{ ref('int_customer_complaints') }} cp on c.customer_id = cp.customer_id
     left join {{ ref('int_customer_digital_score') }} d on c.customer_id = d.customer_id
     left join {{ ref('int_customer_products') }} p on c.customer_id = p.customer_id
+    left join {{ ref('int_customer_balance') }} bal on c.customer_id = bal.customer_id
+    left join {{ ref('int_customer_nbi') }} nbi on c.customer_id = nbi.customer_id
+    left join {{ ref('int_customer_channel') }} ch on c.customer_id = ch.customer_id
+    left join {{ ref('int_customer_loans') }} ln on c.customer_id = ln.customer_id
 ),
 
 -- Normalisation min-max de chaque signal sur 0-100 pour construire le score composite
@@ -85,6 +103,9 @@ select
     salaire_domicilie,
     recency_jours,
     tendance_transactions,
+    nb_txn_30j,
+    nb_txn_90j,
+    tendance_3m,
     nb_reclamations_ouvertes,
     nb_reclamations_total,
     nb_reclamations_severite_haute,
@@ -92,6 +113,12 @@ select
     nb_comptes,
     nb_cartes,
     nb_produits_total,
+    solde_total_xof,
+    avg_balance_90d_xof,
+    nbi_estime_xof,
+    canal_majoritaire,
+    dpd_max,
+    anciennete_jours,
     round(
         coalesce(sous_score_recency, 50) * {{ var('rules_weight_recency') }}
         + coalesce(sous_score_reclamations, 50) * {{ var('rules_weight_complaints') }}
