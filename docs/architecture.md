@@ -108,4 +108,59 @@ embarqué dans le code Python.
 - **Pipeline ML** (`ml/`) — score de règles métier toujours disponible sans
   modèle entraîné (`ml/rules.py`), plus une comparaison de modèles supervisés
   sur label proxy (`ml/comparison.py`), suivie dans MLflow
-  (`mlflow.db`, 20 runs réels enregistrés).
+  (`mlflow.db`, runs réels enregistrés).
+
+## 6. Persistance des données (Cloud Run est stateless)
+
+Cloud Run ne fournit aucun disque persistant : au redémarrage d'une instance
+(nouvelle révision, scale-down puis scale-up), tout ce qui a été écrit sur le
+système de fichiers local disparaît, et le conteneur repart avec les données
+figées dans l'image Docker au moment du build. Un fichier chargé par le
+métier via l'onglet Administration serait donc perdu au premier redémarrage
+sans une couche de persistance externe.
+
+**J'ai retenu un bucket Google Cloud Storage privé**
+(`databank-ci-data-264685034714`, région europe-west9, versioning d'objet
+activé) plutôt que, par exemple, faire persister uniquement le fichier Excel
+source : synchroniser le fichier DuckDB déjà transformé évite de rejouer les
+~60 secondes de pipeline (ingestion → dbt → ML) à chaque démarrage d'instance
+— seul un téléchargement de quelques secondes est nécessaire.
+
+Le module `src/storage_sync.py` expose deux fonctions :
+
+- `telecharger_depuis_gcs()` — appelée une fois au démarrage de chaque
+  instance (dashboard : `st.cache_resource` dans `dashboard/APP.py` ; serveur
+  MCP : appel simple, processus long-vivant). Ne lève jamais : une erreur ne
+  doit pas bloquer le démarrage de l'application.
+- `televerser_vers_gcs()` — appelée après un recalcul réussi depuis l'onglet
+  Administration (`dashboard/pages/99_Administration.py::relancer_pipeline_complet`),
+  pour que le résultat survive au redémarrage de cette instance et soit repris
+  par toutes les autres.
+
+**Garde-fou de compatibilité de schéma.** Sans contrôle, un futur changement
+de schéma dbt (nouvelle colonne dans un mart) pourrait voir son image se
+faire silencieusement écraser au démarrage par un ancien fichier restauré
+depuis GCS — pannes en cascade sur toute requête utilisant la nouvelle
+colonne. `config.DATA_SCHEMA_VERSION`, écrite dans `pipeline_state.json` à
+chaque exécution du pipeline, est comparée par `telecharger_depuis_gcs()`
+avant tout téléchargement : en cas de désaccord, elle ne touche à rien et
+garde les données de l'image (garanties compatibles avec le code courant).
+
+**Cas particulier de `mlflow.db` (SQLite).** Ce fichier n'est jamais copié
+en bruts octets vers GCS : mlflow peut garder un pool de connexions ouvert
+dans le process, ce qui rendrait une copie brute susceptible de capturer un
+état incohérent. `televerser_vers_gcs()` passe par l'API `backup()` de
+`sqlite3` vers un fichier temporaire avant l'upload.
+
+**Resynchronisation de l'Assistant IA.** Le serveur MCP est un service Cloud
+Run distinct (processus séparé, même image Docker, point d'entrée
+différent) : il ne relit GCS qu'à son propre démarrage, pas quand le
+dashboard termine un recalcul. Une route interne `POST /admin/resync` (voir
+`mcp_server/README_MCP.md`) permet au dashboard de lui demander de
+resynchroniser immédiatement après un recalcul persisté, plutôt que
+d'attendre son prochain redémarrage naturel.
+
+**Limite acceptée** : `max-instances=1` est fixé sur les deux services pour
+éviter qu'une instance déjà démarrée serve des données périmées pendant
+qu'une autre vient d'être rafraîchie — trafic interne/admin, faible volume,
+ce compromis est acceptable ici.

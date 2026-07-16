@@ -60,6 +60,16 @@ direct Python import: the AI Assistant page calls the deployed MCP server
 (`dashboard/components/mcp_client.py`), so answers actually go through the
 protocol rather than an in-memory shortcut.
 
+**I added a GCS persistence layer for Administration-tab data uploads**,
+rather than accepting that stateless Cloud Run loses everything on every
+restart. A file uploaded by the business is validated, recomputed (full
+pipeline, ~55 seconds measured in an isolated container), then saved to a
+GCS bucket that every instance re-reads at its own startup
+(`src/storage_sync.py`, detailed in `docs/architecture_en.md` section 6). I
+added a schema-version guard after identifying, during design review, that
+a future dbt schema change could otherwise get silently overwritten by
+older data restored from GCS.
+
 ## 3. An analytical conclusion, not a generic suggestion
 
 On the real portfolio (excluding synthetic customers, to avoid presenting a

@@ -91,6 +91,20 @@ def outil_analyse_reclamations(category: str = None) -> dict:
     return get_complaint_analysis(category=category)
 
 
+@serveur.custom_route("/admin/resync", methods=["POST"])
+async def resynchroniser(request):
+    # Route interne (pas un outil MCP) appelée par le dashboard juste après un
+    # recalcul persisté, pour que ce serveur relise GCS immédiatement plutôt que
+    # d'attendre son propre redémarrage naturel — protégée par ApiKeyMiddleware
+    # comme le reste du transport HTTP
+    # Internal route (not an MCP tool) called by the dashboard right after a
+    # persisted recompute, so this server re-reads GCS immediately instead of
+    # waiting for its own natural restart — protected by ApiKeyMiddleware like
+    # the rest of the HTTP transport
+    succes = telecharger_depuis_gcs()
+    return JSONResponse({"resynchronise": succes})
+
+
 if __name__ == "__main__":
     if TRANSPORT == "streamable-http":
         import uvicorn

@@ -73,3 +73,14 @@ name is translated by `dashboard/components/ui.py::LABELS`, then resolved in
 the active language via `dashboard/i18n/{fr,en}.json`. The full mapping is in
 `LABELS`; see also `docs/decisions.md` for the decision that enforces this
 rule.
+
+## 5. Environment variables
+
+| Variable | Default if unset | Used by | Description |
+|----------|--------------------|--------------|--------------|
+| `ADMIN_PASSWORD` | `databank-admin` | `dashboard/pages/99_Administration.py` | Password for the Administration area |
+| `MCP_SERVER_URL` | none (required) | `dashboard/components/mcp_client.py` | HTTP URL of the deployed MCP server (e.g. `https://databank-ci-mcp-….run.app/mcp`) |
+| `MCP_API_KEY` | none (auth disabled if unset) | `mcp_server/databank_mcp_server.py`, `dashboard/components/mcp_client.py` | Shared key required in the `X-API-Key` header on the MCP server's HTTP transport |
+| `MCP_TRANSPORT` | `stdio` | `mcp_server/databank_mcp_server.py` | `stdio` locally, `streamable-http` in production |
+| `PORT` | `8080` | `mcp_server/databank_mcp_server.py`, Dockerfile | Listening port (injected automatically by Cloud Run) |
+| `GCS_BUCKET_NAME` | none (persistence disabled if unset) | `src/storage_sync.py` | GCS bucket for data persistence beyond a Cloud Run instance's lifecycle — see `docs/architecture_en.md` section 6 |

@@ -56,6 +56,24 @@ Chaque requête HTTP doit alors porter l'en-tête `X-API-Key: <clé>` — voir
 }
 ```
 
+## Persistance des données et resynchronisation
+
+Ce serveur lit `dbt_project/databank_ci.duckdb` en lecture seule. Ce fichier
+n'est pas fixe : voir `src/storage_sync.py` et `docs/architecture.md` (section
+"Persistance des données") pour le mécanisme complet. En résumé :
+
+- Au démarrage du processus, `telecharger_depuis_gcs()` est appelée une fois
+  (ligne 41 de `databank_mcp_server.py`) : si le bucket GCS contient une
+  version compatible (même `schema_version`), les fichiers locaux sont
+  remplacés par cette version avant que le serveur ne commence à répondre.
+- Une route interne `POST /admin/resync` (protégée par le même
+  `ApiKeyMiddleware` que le reste du transport HTTP) permet de redéclencher
+  ce téléchargement sans redémarrer le processus. C'est ce qu'appelle
+  `dashboard/components/mcp_client.py::resynchroniser_mcp()` juste après
+  qu'un recalcul déclenché depuis l'onglet Administration a été persisté
+  dans GCS — pour que les réponses de l'Assistant IA reflètent les données
+  fraîches sans attendre le prochain redémarrage naturel de ce service.
+
 ## Note d'implémentation
 
 Le dossier a été renommé `mcp_server/` (et non `mcp/`) précisément pour

@@ -63,6 +63,16 @@ Python direct : la page Assistant IA appelle le serveur MCP déployé
 (`dashboard/components/mcp_client.py`), pour que les réponses passent
 réellement par le protocole plutôt que par un raccourci en mémoire.
 
+**J'ai ajouté une couche de persistance GCS pour l'upload de données depuis
+l'Administration**, plutôt que d'accepter que Cloud Run (stateless) perde
+tout à chaque redémarrage. Un fichier chargé par le métier est validé,
+recalculé (pipeline complet, ~55 secondes mesurées dans un conteneur isolé),
+puis sauvegardé dans un bucket GCS que chaque instance relit à son démarrage
+(`src/storage_sync.py`, détaillé dans `docs/architecture.md` section 6). J'ai
+ajouté un garde-fou de version de schéma après avoir identifié, en revue de
+conception, qu'un futur changement de schéma dbt pourrait sinon se faire
+silencieusement écraser par une ancienne donnée restaurée depuis GCS.
+
 ## 3. Une conclusion d'analyse, pas une suggestion générique
 
 Sur le portefeuille réel (hors clients synthétiques, pour ne pas présenter

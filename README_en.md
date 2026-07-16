@@ -114,6 +114,27 @@ The dashboard requires searching page by page. The MCP server brings the
 answer back in natural language: "Which VIP customers are at risk?" →
 a structured answer, computed from DuckDB in real time.
 
+## Updating the data
+
+The source file can be reloaded without technical intervention from the
+dashboard's Administration tab (password required, see `ADMIN_PASSWORD` in
+`docs/data_dictionary_en.md`).
+
+**Procedure:**
+1. Administration tab → "Load a new data file" section
+2. Upload the Excel file (same format, 10 sheets)
+3. Check the validation report (sheet by sheet)
+4. If valid, click "Recompute now"
+
+The full pipeline replays (ingestion → dbt → ML, ~55 seconds measured), the
+result is immediately visible on this instance, then saved to a private
+Google Cloud Storage bucket to survive restarts and be picked up by every
+instance — dashboard and MCP server (AI Assistant) included, the latter
+being explicitly resynced right afterward. No further action is needed (no
+file replacement in the repo, no image rebuild). Detail on the mechanism,
+the schema-compatibility guard, and the accepted limitations in
+`docs/architecture_en.md` (section 6).
+
 ## Project structure
 
 ```

@@ -9,6 +9,7 @@ import asyncio
 import json
 import os
 
+import httpx
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 
@@ -39,3 +40,19 @@ def appeler_outil(nom_outil: str, **arguments) -> list:
     if not MCP_SERVER_URL:
         raise RuntimeError("MCP_SERVER_URL n'est pas configuré.")
     return asyncio.run(_appeler_outil_async(nom_outil, arguments))
+
+
+def resynchroniser_mcp() -> bool:
+    """Demande au serveur MCP de relire GCS immédiatement (voir src/storage_sync.py),
+    pour que l'Assistant IA reflète un recalcul sans attendre son propre redémarrage.
+    Best-effort : ne lève jamais, un échec ne doit pas remettre en cause le succès
+    du recalcul local déjà persisté."""
+    if not MCP_SERVER_URL:
+        return False
+    url_resync = MCP_SERVER_URL.rsplit("/mcp", 1)[0] + "/admin/resync"
+    headers = {"X-API-Key": MCP_API_KEY} if MCP_API_KEY else {}
+    try:
+        reponse = httpx.post(url_resync, headers=headers, timeout=30)
+        return reponse.status_code == 200 and reponse.json().get("resynchronise", False)
+    except Exception:
+        return False

@@ -109,10 +109,21 @@ def relancer_pipeline_complet(fichier) -> bool:
 
     try:
         televerser_vers_gcs()
-        return True
     except Exception as erreur:
         log_event("pipeline", "ERROR", "[GCS][SYNC] Persistance échouée après recalcul", {"erreur": str(erreur)})
         return False
+
+    # Best-effort : l'Assistant IA (serveur MCP, processus séparé) ne relit GCS
+    # qu'à son propre démarrage — on lui demande de le faire tout de suite plutôt
+    # que d'attendre son prochain redémarrage naturel
+    # Best-effort: the AI Assistant (MCP server, separate process) only re-reads
+    # GCS at its own startup — ask it to do so right away instead of waiting for
+    # its next natural restart
+    from components.mcp_client import resynchroniser_mcp
+    if not resynchroniser_mcp():
+        log_event("pipeline", "ERROR", "[MCP][RESYNC] Échec — Assistant IA périmé jusqu'à son redémarrage", {})
+
+    return True
 
 
 def afficher_derniere_lignes_log(chemin: str, n: int = 20) -> None:

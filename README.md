@@ -115,6 +115,28 @@ Le dashboard requiert de chercher l'information page par page. Le MCP la
 ramène en langage naturel : "Quels clients VIP sont à risque ?" → réponse
 structurée, calculée depuis DuckDB en temps réel.
 
+## Mise à jour des données
+
+Le fichier source peut être rechargé sans intervention technique depuis
+l'onglet Administration du dashboard (mot de passe requis, voir
+`ADMIN_PASSWORD` dans `docs/data_dictionary.md`).
+
+**Procédure :**
+1. Onglet Administration → section "Charger un nouveau fichier de données"
+2. Charger le fichier Excel (même format, 10 feuilles)
+3. Vérifier le rapport de validation (feuille par feuille)
+4. Si valide, cliquer sur "Recalculer maintenant"
+
+Le pipeline complet se rejoue (ingestion → dbt → ML, ~55 secondes mesurées),
+le résultat est immédiatement visible sur cette instance, puis sauvegardé
+dans un bucket Google Cloud Storage privé pour survivre aux redémarrages et
+être repris par toutes les instances — dashboard et serveur MCP (Assistant
+IA) inclus, ce dernier étant explicitement resynchronisé juste après.
+Aucune action supplémentaire n'est nécessaire (pas de remplacement de
+fichier dans le dépôt, pas de reconstruction d'image). Détail du mécanisme,
+du garde-fou de compatibilité de schéma et des limites acceptées dans
+`docs/architecture.md` (section 6).
+
 ## Structure du projet
 
 ```
