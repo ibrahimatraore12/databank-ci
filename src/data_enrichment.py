@@ -26,6 +26,7 @@ def generate_score_engagement(
     # Score composite d'engagement 0-100 : recency(30%), activité(25%), digital(25%), produits(20%)
     # Composite 0-100 engagement score: recency(30%), activity(25%), digital(25%), products(20%)
     # Pondération documentée dans docs/decisions.md
+    # Weighting documented in docs/decisions.md
     date_reference = df_transactions["txn_datetime"].max()
 
     derniere_txn = df_transactions.groupby("customer_id")["txn_datetime"].max()

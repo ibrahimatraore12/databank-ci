@@ -59,7 +59,9 @@ def save_bronze_to_duckdb(tables_reelles: dict, tables_synthetiques: dict) -> No
             df_reel["is_synthetic"] = False
         connection.execute(f"CREATE OR REPLACE TABLE bronze_{nom.lower()} AS SELECT * FROM df_reel")
 
-        df_synth = tables_synthetiques[nom]  # noqa: F841 -- lu par DuckDB via la requête ci-dessous
+        # Lu par DuckDB via la requête ci-dessous, pas directement en Python
+        # Read by DuckDB via the query below, not directly in Python
+        df_synth = tables_synthetiques[nom]  # noqa: F841
         connection.execute(f"CREATE OR REPLACE TABLE bronze_synthetic_{nom.lower()} AS SELECT * FROM df_synth")
 
     connection.close()
