@@ -223,7 +223,7 @@ with onglet_profil:
     fig_engagement = px.scatter(
         df, x="recency_jours", y="score_digital", color="segment", color_discrete_map=SEGMENT_COLOR_MAP,
         labels={"recency_jours": label_technique("recency_jours"), "score_digital": label_technique("score_digital")},
-        title=t("titre_engagement_digital_vs_activite"),
+        title=t("titre_engagement_digital_vs_activite"), hover_name="customer_id",
     )
     fig_engagement.add_vrect(x0=0, x1=30, fillcolor=RISK_COLOR_MAP["Low"], opacity=0.08, line_width=0)
     fig_engagement.add_vrect(x0=30, x1=60, fillcolor=RISK_COLOR_MAP["Medium"], opacity=0.08, line_width=0)

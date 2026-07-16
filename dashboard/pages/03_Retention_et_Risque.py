@@ -201,7 +201,7 @@ with col_droite:
             "n_reclamations_ouvertes": label_technique("nb_reclamations_ouvertes"),
             "risque_composite": t("score_de_risque"),
         },
-        title=t("titre_reclamations_vs_risque"),
+        title=t("titre_reclamations_vs_risque"), hover_name="customer_id",
     )
     if df_scatter["n_reclamations_ouvertes"].nunique() > 1:
         pente, ordonnee = np.polyfit(df_scatter["n_reclamations_ouvertes"], df_scatter["risque_composite"], 1)

@@ -153,6 +153,7 @@ def graphique_nuage_valeur_engagement(
     fig = px.scatter(
         df, x=x, y=y, color=couleur, size=taille, title=titre,
         color_discrete_map=SEGMENT_COLOR_MAP, labels=labels or {},
+        hover_name="customer_id" if "customer_id" in df.columns else None,
     )
     return _theme_transparent(fig)
 
