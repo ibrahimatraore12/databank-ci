@@ -49,3 +49,36 @@ def calculate_risk_score(df: pd.DataFrame) -> pd.DataFrame:
     })
     log_event("ml", "INFO", "[RULES][calculate_risk_score] OK", {"lignes": len(resultat)})
     return resultat
+
+
+def decompose_risk_score(df: pd.DataFrame, customer_id: str) -> dict:
+    # Décompose le score de risque d'un client en ses 4 contributions pondérées,
+    # sur la même normalisation min-max que calculate_risk_score (portefeuille de df) —
+    # sert à expliquer le score dans la fiche client (Vue 360°)
+    # Decomposes a customer's risk score into its 4 weighted contributions, on the
+    # same min-max normalization as calculate_risk_score (df's portfolio) — used to
+    # explain the score in the customer record (360 view)
+    colonnes_requises = [
+        "customer_id", "recency_jours", "nb_reclamations_ouvertes",
+        "score_digital", "tendance_transactions",
+    ]
+    manquantes = [c for c in colonnes_requises if c not in df.columns]
+    if manquantes:
+        raise ValueError(f"decompose_risk_score: colonnes manquantes {manquantes}")
+
+    lignes = df.index[df["customer_id"] == customer_id]
+    if len(lignes) == 0:
+        raise ValueError(f"decompose_risk_score: client {customer_id} introuvable")
+    idx = lignes[0]
+
+    sous_score_recency = _normaliser_0_100(df["recency_jours"], sens_positif=True).loc[idx]
+    sous_score_reclamations = _normaliser_0_100(df["nb_reclamations_ouvertes"], sens_positif=True).loc[idx]
+    sous_score_digital = _normaliser_0_100(df["score_digital"], sens_positif=False).loc[idx]
+    sous_score_tendance = _normaliser_0_100(df["tendance_transactions"], sens_positif=False).loc[idx]
+
+    return {
+        "recency": round(sous_score_recency * config.RULES_WEIGHT_RECENCY, 1),
+        "reclamations": round(sous_score_reclamations * config.RULES_WEIGHT_COMPLAINTS, 1),
+        "digital": round(sous_score_digital * config.RULES_WEIGHT_DIGITAL, 1),
+        "tendance": round(sous_score_tendance * config.RULES_WEIGHT_TREND, 1),
+    }

@@ -24,6 +24,12 @@ COULEUR_POSITIF = "#1E8449"
 COULEUR_ATTENTION = "#F39C12"
 COULEUR_CRITIQUE = "#E74C3C"
 
+# Couleur CTA de la charte Artefact — réservée aux barres d'action prioritaire,
+# jamais une identité de segment ni un statut RAG (évite toute ambiguïté de sens)
+# Artefact CTA color — reserved for priority-action bars, never a segment
+# identity nor a RAG status (avoids any ambiguity of meaning)
+COULEUR_ORANGE_ACTION = "#FF4500"
+
 # Validée par le script six-checks du skill dataviz (lisibilité clair/sombre,
 # séparation CVD) : violet, rose, bleu, sarcelle — jamais le navy (illisible
 # comme couleur de marque catégorielle, réservé aux fonds/en-têtes)
@@ -68,21 +74,27 @@ def graphique_barres(df: pd.DataFrame, x: str, y: str, titre: str = "") -> go.Fi
 
 def graphique_camembert(
     df: pd.DataFrame, labels: str, values: str, titre: str = "", color_col: str = None, color_map: dict = None,
+    trou: float = 0, texte_centre: str = None,
 ) -> go.Figure:
     # Diagramme circulaire pour une répartition catégorielle ; color_col + color_map
     # permettent de fixer une couleur par valeur exacte (ex: RISK_COLOR_MAP sur la
     # colonne brute risk_band) plutôt que sur l'ordre des données ou un libellé
-    # d'affichage qui inclut le décompte (ex: "High (38)")
+    # d'affichage qui inclut le décompte (ex: "High (38)") ; trou + texte_centre
+    # transforment le camembert en donut avec une valeur affichée au centre
     # Pie chart for a categorical breakdown; color_col + color_map let the caller fix
     # a color per exact value (e.g. RISK_COLOR_MAP on the raw risk_band column) rather
-    # than the data's row order or a display label that includes the count (e.g. "High (38)")
+    # than the data's row order or a display label that includes the count (e.g.
+    # "High (38)"); trou + texte_centre turn the pie into a donut with a center value
     if color_map:
         fig = px.pie(
             df, names=labels, values=values, title=titre,
-            color=color_col or labels, color_discrete_map=color_map,
+            color=color_col or labels, color_discrete_map=color_map, hole=trou,
         )
     else:
-        fig = px.pie(df, names=labels, values=values, title=titre, color_discrete_sequence=PALETTE_CATEGORIELLE)
+        fig = px.pie(df, names=labels, values=values, title=titre,
+                     color_discrete_sequence=PALETTE_CATEGORIELLE, hole=trou)
+    if texte_centre:
+        fig.add_annotation(text=texte_centre, x=0.5, y=0.5, showarrow=False, font=dict(size=15))
     return _theme_transparent(fig)
 
 
@@ -120,10 +132,12 @@ def graphique_jauge_score(score: float, titre: str = "") -> go.Figure:
     return _theme_transparent(fig)
 
 
-def graphique_barres_horizontales(df: pd.DataFrame, x: str, y: str, titre: str = "") -> go.Figure:
+def graphique_barres_horizontales(
+    df: pd.DataFrame, x: str, y: str, titre: str = "", couleur: str = COULEUR_ACCENT,
+) -> go.Figure:
     # Diagramme en barres horizontales, utile pour les classements
     # Horizontal bar chart, useful for rankings
-    fig = px.bar(df, x=x, y=y, title=titre, orientation="h", color_discrete_sequence=[COULEUR_ACCENT])
+    fig = px.bar(df, x=x, y=y, title=titre, orientation="h", color_discrete_sequence=[couleur])
     return _theme_transparent(fig)
 
 

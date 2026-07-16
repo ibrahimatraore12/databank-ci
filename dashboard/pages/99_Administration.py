@@ -15,13 +15,15 @@ import streamlit as st  # noqa: E402
 
 import config  # noqa: E402
 from components.ui import (  # noqa: E402
-    afficher_entete, afficher_etapes_pipeline, afficher_pied_de_page, format_run_id, t,
+    afficher_entete, afficher_entete_section, afficher_etapes_pipeline, afficher_guide,
+    afficher_pied_de_page, format_run_id, t,
 )
 from src.logger import log_event  # noqa: E402
 
 st.set_page_config(page_title="Administration", page_icon="🏦", layout="wide")
 
-afficher_entete(t("nav_admin"), t("page_admin_intro"))
+afficher_entete(t("nav_admin"), t("page_admin_intro"), "🔧")
+afficher_guide(t("guide_admin"))
 
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "databank-admin")
 
@@ -248,7 +250,7 @@ st.success(t("acces_autorise"))
 etat_pipeline = charger_json(config.PIPELINE_STATE_PATH)
 lineage = charger_json(config.LINEAGE_PATH)
 
-st.subheader(t("etat_pipeline"))
+afficher_entete_section(t("etat_pipeline"))
 if etat_pipeline:
     run_id = etat_pipeline.get("last_updated", "—")
     st.caption(f"run_id : {format_run_id(run_id)}")
@@ -256,10 +258,10 @@ if etat_pipeline:
 else:
     st.info("—")
 
-st.subheader("Lineage")
+afficher_entete_section(t("titre_lineage"))
 st.json(lineage) if lineage else st.info("—")
 
-st.subheader("Logs")
+afficher_entete_section(t("titre_logs"))
 onglet_pipeline, onglet_ml, onglet_api, onglet_errors = st.tabs(["pipeline.log", "ml.log", "api.log", "errors.log"])
 with onglet_pipeline:
     afficher_derniere_lignes_log(os.path.join(config.LOGS_DIR, "pipeline.log"))
@@ -270,7 +272,7 @@ with onglet_api:
 with onglet_errors:
     afficher_derniere_lignes_log(os.path.join(config.LOGS_DIR, "errors.log"))
 
-st.subheader(t("titre_etude_modeles"))
+afficher_entete_section(t("titre_etude_modeles"))
 chemin_rapport = os.path.join(config.PROJECT_ROOT, "docs", "model_comparison.md")
 try:
     with open(chemin_rapport, "r", encoding="utf-8") as f:
@@ -278,7 +280,7 @@ try:
 except Exception:
     st.info("—")
 
-st.subheader(t("titre_upload"))
+afficher_entete_section(t("titre_upload"))
 st.caption(t("upload_intro"))
 fichier_uploade = st.file_uploader(t("uploader_label"), type=["xlsx"])
 if fichier_uploade is not None:

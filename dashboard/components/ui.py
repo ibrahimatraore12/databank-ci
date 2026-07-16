@@ -65,6 +65,118 @@ LABELS = {
 MOIS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet",
            "août", "septembre", "octobre", "novembre", "décembre"]
 
+# CSS unique de la charte visuelle Artefact (noir #0D0D0D + orange #FF4500),
+# injecté une seule fois depuis APP.py — s'applique à toutes les pages car
+# Streamlit partage le même DOM de session entre les pages du routeur
+# Single Artefact visual identity stylesheet (black #0D0D0D + orange #FF4500),
+# injected once from APP.py — applies to every page since Streamlit shares the
+# same session DOM across the router's pages
+CSS_ARTEFACT = """
+<style>
+section[data-testid="stSidebar"] { background-color: #0D0D0D !important; border-right: 1px solid #2C2C2C; }
+section[data-testid="stSidebar"] * { color: #FFFFFF !important; }
+section[data-testid="stSidebar"] .stRadio label { color: rgba(255,255,255,0.7) !important; font-size: 13px; }
+section[data-testid="stSidebar"] .stRadio label:hover { color: #FF4500 !important; }
+
+.stApp { background-color: #F5F5F5; }
+
+.page-banner {
+    background: linear-gradient(135deg, #0D0D0D 0%, #1A1A1A 100%);
+    color: #FFFFFF; padding: 20px 24px; border-radius: 8px;
+    margin-bottom: 20px; border-left: 5px solid #FF4500;
+}
+.page-banner h1 { margin: 0 0 4px 0; font-size: 22px; font-weight: 700; color: #FFFFFF; }
+.page-banner p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.7); }
+
+.guide-box {
+    background: #F8F8F8; border: 1px solid #E0E0E0; border-radius: 8px;
+    padding: 14px 18px; margin-bottom: 16px; font-size: 13px; color: #444444; line-height: 1.6;
+}
+.guide-box strong { color: #0D0D0D; }
+
+.section-header {
+    background: #0D0D0D; color: #FFFFFF; padding: 10px 20px;
+    border-left: 4px solid #FF4500; border-radius: 4px;
+    margin: 16px 0 12px 0; font-size: 15px; font-weight: 600;
+}
+
+.alert-box { border-radius: 8px; padding: 14px 18px; margin-bottom: 14px; font-size: 14px; line-height: 1.5; }
+.alert-box.critical { background: #FFF0ED; border: 1px solid #FF4500; }
+.alert-box.danger   { background: #FDECEA; border: 1px solid #E74C3C; }
+.alert-box.success  { background: #EAF7EF; border: 1px solid #1E8449; }
+.alert-box.warning  { background: #FFFDF5; border: 1px solid #F39C12; }
+
+.kpi-card {
+    background: #FFFFFF; border-left: 4px solid #FF4500; border-radius: 8px;
+    padding: 16px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 8px; height: 100%;
+}
+.kpi-card.danger  { border-left-color: #E74C3C; background: #FFF8F8; }
+.kpi-card.warning { border-left-color: #F39C12; background: #FFFDF5; }
+.kpi-card.success { border-left-color: #1E8449; background: #F5FBF7; }
+.kpi-label { font-size: 11px; color: #6B6B6B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.kpi-value { font-size: 28px; font-weight: 700; color: #0D0D0D; line-height: 1.2; }
+.kpi-delta { font-size: 12px; margin-top: 4px; }
+.kpi-delta.pos { color: #1E8449; } .kpi-delta.neg { color: #E74C3C; } .kpi-delta.neu { color: #6B6B6B; }
+
+[data-testid="metric-container"] {
+    background: #FFFFFF; border-left: 4px solid #FF4500; border-radius: 8px;
+    padding: 12px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+[data-testid="metric-container"] label {
+    font-size: 11px !important; color: #6B6B6B !important; text-transform: uppercase;
+}
+[data-testid="metric-container"] [data-testid="stMetricValue"] {
+    font-size: 26px !important; font-weight: 700 !important; color: #0D0D0D !important;
+}
+
+.stDataFrame thead tr th {
+    background-color: #0D0D0D !important; color: #FFFFFF !important; font-size: 12px !important;
+    text-transform: uppercase; letter-spacing: 0.3px;
+}
+.stDataFrame tbody tr:nth-child(even) { background-color: #F9F9F9; }
+
+.stTabs [data-baseweb="tab-list"] { background: #0D0D0D; border-radius: 8px 8px 0 0; padding: 4px 8px 0; }
+.stTabs [data-baseweb="tab"] { color: rgba(255,255,255,0.6) !important; font-size: 13px; padding: 8px 16px; }
+.stTabs [aria-selected="true"] {
+    color: #FF4500 !important; border-bottom: 2px solid #FF4500 !important; font-weight: 600;
+}
+
+.stButton button[kind="primary"] {
+    background: #FF4500 !important; border: none !important; color: white !important;
+    font-weight: 600 !important; border-radius: 6px !important;
+}
+.stButton button[kind="primary"]:hover { background: #CC3700 !important; }
+
+.badge-premier, .badge-affluent, .badge-mass, .badge-youth {
+    color:#fff; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:600;
+}
+.badge-premier  { background:#6C3483; }
+.badge-affluent { background:#1A5276; }
+.badge-mass     { background:#2980B9; }
+.badge-youth    { background:#BA7517; }
+.badge-action-danger  {
+    background:#E74C3C; color:#fff; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:600;
+}
+.badge-action-warning {
+    background:#F39C12; color:#fff; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:600;
+}
+.badge-action-success {
+    background:#1E8449; color:#fff; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:600;
+}
+
+details summary { font-weight: 600; color: #0D0D0D; font-size: 14px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #F5F5F5; }
+::-webkit-scrollbar-thumb { background: #FF4500; border-radius: 3px; }
+</style>
+"""
+
+
+def injecter_css_artefact() -> None:
+    # Injecte le CSS de la charte Artefact une seule fois, depuis APP.py (routeur)
+    # Injects the Artefact visual identity CSS once, from APP.py (router)
+    st.markdown(CSS_ARTEFACT, unsafe_allow_html=True)
+
 
 def charger_traductions(langue: str) -> dict:
     # Charge le dictionnaire de traduction pour une langue (mis en cache Streamlit)
@@ -136,13 +248,39 @@ def format_run_id(run_id) -> str:
 
 
 def couleur_score(score: float) -> str:
-    # Palette RAG : rouge (critique), ambre (attention), vert (positif)
-    # RAG palette: red (critical), amber (attention), green (positive)
-    if score >= 66:
+    # Palette RAG : rouge (>=70, critique), ambre (>=40, attention), vert (positif) —
+    # seuils alignés sur la règle métier (voir docs/decisions.md)
+    # RAG palette: red (>=70, critical), amber (>=40, attention), green (positive) —
+    # thresholds aligned with the business rule (see docs/decisions.md)
+    if score >= 70:
         return "#E74C3C"
-    if score >= 33:
+    if score >= 40:
         return "#F39C12"
     return "#1E8449"
+
+
+def niveau_risque(score: float) -> tuple:
+    # Retourne (couleur RAG, libellé traduit) pour un score 0-100
+    # Returns (RAG color, translated label) for a 0-100 score
+    if score >= 70:
+        return "#E74C3C", t("libelle_risque_eleve")
+    if score >= 40:
+        return "#F39C12", t("libelle_risque_modere")
+    return "#1E8449", t("libelle_risque_faible")
+
+
+def badge_segment(segment: str) -> str:
+    # Pastille HTML colorée par segment (Premier/Affluent/Mass/Youth)
+    # HTML pill colored by segment (Premier/Affluent/Mass/Youth)
+    classe = {"Premier": "badge-premier", "Affluent": "badge-affluent",
+              "Mass": "badge-mass", "Youth": "badge-youth"}.get(segment, "badge-mass")
+    return f'<span class="{classe}">{segment}</span>'
+
+
+def badge_action(texte: str, type_action: str = "warning") -> str:
+    # Pastille HTML pour une action recommandée (danger/warning/success)
+    # HTML pill for a recommended action (danger/warning/success)
+    return f'<span class="badge-action-{type_action}">{texte}</span>'
 
 
 def afficher_barre_score(score: float, label: str = "") -> None:
@@ -164,24 +302,49 @@ def afficher_barre_score(score: float, label: str = "") -> None:
     )
 
 
-def afficher_entete(titre: str, sous_titre: str = "") -> None:
-    # Titre centré avec encadré dégradé, charte de marque (violet/rose,
-    # inspirée d'Artefact) : navy en amorce, violet, liseré rose en accent —
-    # les mêmes couleurs que components/charts.py::COULEUR_PREMIER/ACCENT,
-    # pour que le bandeau et les graphiques restent visuellement cohérents
-    # Centered title with a gradient banner, brand identity (purple/pink,
-    # Artefact-inspired): navy lead-in, purple, pink accent underline — the
-    # same colors as components/charts.py::COULEUR_PREMIER/ACCENT, so the
-    # banner and the charts stay visually consistent
+def afficher_entete(titre: str, sous_titre: str = "", emoji: str = "") -> None:
+    # Bandeau de page : fond noir dégradé, liseré orange, emoji optionnel — charte Artefact
+    # Page banner: black gradient, orange left border, optional emoji — Artefact identity
+    prefixe = f"{emoji} " if emoji else ""
     st.markdown(
-        f"""
-        <div style="background:linear-gradient(135deg,#1A1A2E,#3B1F5C 55%,#6C2EB5);
-                    padding:24px;border-radius:10px;text-align:center;margin-bottom:20px;
-                    border-bottom:3px solid #EC0868;">
-          <h1 style="color:white;margin:0;">{titre}</h1>
-          <p style="color:#dddddd;margin:6px 0 0 0;">{sous_titre}</p>
-        </div>
-        """,
+        f'<div class="page-banner"><h1>{prefixe}{titre}</h1><p>{sous_titre}</p></div>',
+        unsafe_allow_html=True,
+    )
+
+
+def afficher_guide(texte: str) -> None:
+    # Boîte grise d'explication en haut de page, sous le bandeau — répond à
+    # "quelle question décisionnelle cette page résout-elle ?"
+    # Grey explanation box at the top of the page, under the banner — answers
+    # "what decision question does this page solve?"
+    st.markdown(f'<div class="guide-box">{texte}</div>', unsafe_allow_html=True)
+
+
+def afficher_entete_section(titre: str) -> None:
+    # En-tête de section : fond noir, liseré orange à gauche
+    # Section header: black background, orange left border
+    st.markdown(f'<div class="section-header">{titre}</div>', unsafe_allow_html=True)
+
+
+def afficher_alerte(texte: str, type_alerte: str = "danger", icone: str = "🚨") -> None:
+    # Boîte d'alerte RAG — danger/critical pour les risques à traiter, success pour
+    # les signaux positifs (le dashboard doit aussi montrer ce qui va bien)
+    # RAG alert box — danger/critical for risks to act on, success for positive
+    # signals (the dashboard must also surface what's going well)
+    st.markdown(f'<div class="alert-box {type_alerte}">{icone} {texte}</div>', unsafe_allow_html=True)
+
+
+def afficher_carte_kpi(label: str, valeur: str, delta: str = "", type_carte: str = "") -> None:
+    # Carte KPI stylisée ; type_carte ∈ {"", "success", "warning", "danger"} pilote la couleur RAG
+    # Styled KPI card; type_carte drives the RAG color
+    classe = f"kpi-card {type_carte}" if type_carte else "kpi-card"
+    delta_html = ""
+    if delta:
+        sens = "pos" if delta.startswith("+") else "neg" if delta.startswith("-") else "neu"
+        delta_html = f'<div class="kpi-delta {sens}">{delta}</div>'
+    st.markdown(
+        f'<div class="{classe}"><div class="kpi-label">{label}</div>'
+        f'<div class="kpi-value">{valeur}</div>{delta_html}</div>',
         unsafe_allow_html=True,
     )
 
@@ -198,14 +361,15 @@ def afficher_etapes_pipeline(etat: dict) -> None:
     st.caption(f"{t('derniere_execution')} : {etat.get('last_updated', '—')[:19]}")
 
 
-def afficher_pied_de_page() -> None:
-    # Signature d'auteur, sobre, identique sur chaque page
-    # Author signature, sober, identical on every page
+def afficher_pied_de_page(date_maj: str = "") -> None:
+    # Signature d'auteur sur chaque page, avec date de dernière MAJ optionnelle (accueil)
+    # Author signature on every page, with optional last-update date (home page)
+    ligne_date = f'<div style="margin-bottom:4px;">{date_maj}</div>' if date_maj else ""
     st.markdown(
-        """
-        <div style="text-align:center;color:#888;font-size:0.8rem;
-                    margin-top:32px;padding-top:12px;border-top:1px solid rgba(128,128,128,0.3);">
-          Ibrahima TRAORE — Analytics Engineer
+        f"""
+        <div style="text-align:center;color:#6B6B6B;font-size:0.8rem;
+                    margin-top:32px;padding-top:12px;border-top:2px solid #FF4500;">
+          {ligne_date}Ibrahima TRAORÉ — Analytics Engineer
         </div>
         """,
         unsafe_allow_html=True,
