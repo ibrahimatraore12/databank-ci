@@ -149,5 +149,18 @@
   "action_campagne_reactivation": "Campagne de réactivation",
   "action_maintenir_relation": "Maintenir la relation",
 
-  "alerte_risque_solde": "{n} clients présentent un risque crédit élevé — ils représentent {solde} de solde géré."
+  "alerte_risque_solde": "{n} clients présentent un risque crédit élevé — ils représentent {solde} de solde géré.",
+
+  "titre_upload": "Charger un nouveau fichier de données",
+  "upload_intro": "Valide la structure d'un nouveau starter_dataset.xlsx (10 feuilles attendues) avant toute mise en production.",
+  "uploader_label": "Fichier Excel (.xlsx)",
+  "upload_valide": "Fichier valide : les 10 feuilles sont présentes et non vides.",
+  "upload_invalide": "{n} feuille(s) en erreur — voir le détail ci-dessous.",
+  "upload_instructions": "Pour mettre ce fichier en production : remplacez data/raw/starter_dataset.xlsx par ce fichier, puis reconstruisez et redéployez l'image Docker (voir scripts/deploy.sh). Ce service Cloud Run n'a pas d'état : aucun fichier chargé ici n'est conservé au-delà de cette session.",
+  "feuille_vide": "feuille vide",
+  "feuille_illisible": "feuille introuvable ou illisible",
+  "col_feuille": "Feuille",
+  "col_lignes": "Lignes",
+  "col_taux_nuls": "Taux de valeurs nulles",
+  "col_erreurs": "Erreurs"
 }

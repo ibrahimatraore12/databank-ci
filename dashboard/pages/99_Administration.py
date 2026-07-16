@@ -8,6 +8,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
 import config  # noqa: E402
@@ -45,6 +46,30 @@ def charger_json(chemin: str) -> dict:
         return {}
     with open(chemin, "r") as f:
         return json.load(f)
+
+
+def valider_fichier_uploade(fichier) -> list:
+    # Même contrôle que src/ingest.py::load_source_tables (feuille non vide,
+    # taux de valeurs nulles), mais sans jamais lever : on veut le rapport
+    # complet des 10 feuilles, pas un arrêt à la première erreur
+    # Same check as src/ingest.py::load_source_tables (non-empty sheet, null
+    # rate), but never raising: we want the full 10-sheet report, not a stop
+    # at the first error
+    rapports = []
+    for nom_feuille in config.SOURCE_SHEETS:
+        try:
+            df = pd.read_excel(fichier, sheet_name=nom_feuille)
+            taux_nuls = round(100 * df.isna().sum().sum() / max(df.size, 1), 2)
+            erreurs = [t("feuille_vide")] if df.empty else []
+            rapports.append({
+                "table": nom_feuille, "lignes": len(df), "taux_nuls_pct": taux_nuls, "erreurs": ", ".join(erreurs),
+            })
+        except Exception as erreur:
+            rapports.append({
+                "table": nom_feuille, "lignes": 0, "taux_nuls_pct": None,
+                "erreurs": f"{t('feuille_illisible')} : {erreur}",
+            })
+    return rapports
 
 
 def afficher_derniere_lignes_log(chemin: str, n: int = 20) -> None:
@@ -96,5 +121,26 @@ try:
         st.markdown(f.read())
 except Exception:
     st.info("—")
+
+st.subheader(t("titre_upload"))
+st.caption(t("upload_intro"))
+fichier_uploade = st.file_uploader(t("uploader_label"), type=["xlsx"])
+if fichier_uploade is not None:
+    rapports_feuilles = valider_fichier_uploade(fichier_uploade)
+    nb_erreurs = sum(1 for r in rapports_feuilles if r["erreurs"])
+
+    if nb_erreurs == 0:
+        st.success(t("upload_valide"))
+    else:
+        st.error(t("upload_invalide").format(n=nb_erreurs))
+
+    tableau_validation = pd.DataFrame(rapports_feuilles).rename(columns={
+        "table": t("col_feuille"), "lignes": t("col_lignes"),
+        "taux_nuls_pct": t("col_taux_nuls"), "erreurs": t("col_erreurs"),
+    })
+    st.dataframe(tableau_validation, width='stretch', hide_index=True)
+
+    if nb_erreurs == 0:
+        st.info(t("upload_instructions"))
 
 afficher_pied_de_page()
