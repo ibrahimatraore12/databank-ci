@@ -53,6 +53,13 @@ LABELS = {
     "full_name": "nom_complet",
     "customer_id": "identifiant_client",
     "preferred_channel": "canal_prefere",
+    "solde_total_xof": "solde_total",
+    "anciennete_jours": "anciennete_jours",
+    "canal_majoritaire": "canal_bancaire_principal",
+    "nb_txn_30j": "transactions_30_jours",
+    "nb_txn_90j": "transactions_90_jours",
+    "tendance_3m": "tendance_3_mois",
+    "dpd_max": "retard_maximum_jours",
 }
 
 MOIS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet",
@@ -90,6 +97,17 @@ def format_fcfa(valeur) -> str:
     entier = int(round(float(valeur)))
     formate = f"{entier:,}".replace(",", " ")
     return f"{formate} {config.CURRENCY_LABEL}"
+
+
+def format_fcfa_compact(valeur) -> str:
+    # "4,2 M FCFA" au-delà d'1 million, sinon identique à format_fcfa
+    # "4.2 M FCFA" above 1 million, otherwise same as format_fcfa
+    if pd.isna(valeur):
+        return "—"
+    valeur = float(valeur)
+    if abs(valeur) >= 1_000_000:
+        return f"{valeur / 1_000_000:.1f}".replace(".", ",") + f" M {config.CURRENCY_LABEL}"
+    return format_fcfa(valeur)
 
 
 def format_pct(valeur) -> str:
@@ -147,14 +165,45 @@ def afficher_barre_score(score: float, label: str = "") -> None:
 
 
 def afficher_entete(titre: str, sous_titre: str = "") -> None:
-    # Titre centré avec encadré dégradé sombre, charte visuelle du projet
-    # Centered title with a dark gradient banner, project visual identity
+    # Titre centré avec encadré dégradé, charte visuelle du projet — dégradé
+    # navy vers violet (couleur du segment Premier) avec un fin liseré accent,
+    # plus chaleureux que l'ancien dégradé navy-sur-navy
+    # Centered title with a gradient banner, project visual identity — navy to
+    # purple gradient (Premier segment color) with a thin accent underline,
+    # warmer than the previous navy-on-navy gradient
     st.markdown(
         f"""
-        <div style="background:linear-gradient(135deg,#1A1A2E,#16213E);
-                    padding:24px;border-radius:10px;text-align:center;margin-bottom:20px;">
+        <div style="background:linear-gradient(135deg,#1A1A2E,#3B1F5C);
+                    padding:24px;border-radius:10px;text-align:center;margin-bottom:20px;
+                    border-bottom:3px solid #FF4500;">
           <h1 style="color:white;margin:0;">{titre}</h1>
-          <p style="color:#cccccc;margin:6px 0 0 0;">{sous_titre}</p>
+          <p style="color:#dddddd;margin:6px 0 0 0;">{sous_titre}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def afficher_etapes_pipeline(etat: dict) -> None:
+    # Liste ✅/❌ des étapes du pipeline, dans le corps de la page (pas la sidebar)
+    # ✅/❌ list of pipeline steps, in the page body (not the sidebar)
+    if not etat:
+        st.info("—")
+        return
+    for etape, statut in etat.get("steps", {}).items():
+        icone = "✅" if statut == "OK" else "❌"
+        st.markdown(f"{icone} {etape}")
+    st.caption(f"{t('derniere_execution')} : {etat.get('last_updated', '—')[:19]}")
+
+
+def afficher_pied_de_page() -> None:
+    # Signature d'auteur, sobre, identique sur chaque page
+    # Author signature, sober, identical on every page
+    st.markdown(
+        """
+        <div style="text-align:center;color:#888;font-size:0.8rem;
+                    margin-top:32px;padding-top:12px;border-top:1px solid rgba(128,128,128,0.3);">
+          Ibrahima TRAORE — Analytics Engineer
         </div>
         """,
         unsafe_allow_html=True,

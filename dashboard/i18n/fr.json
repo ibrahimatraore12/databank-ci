@@ -48,6 +48,9 @@
   "question_top_risque": "Quels sont les clients les plus à risque ?",
   "question_cross_sell": "Quels clients cibler pour le cross-sell ?",
   "question_kpis": "Quels sont les KPIs du portefeuille ?",
+  "question_reclamations": "Quelle est la situation des réclamations ?",
+  "questions_comprises_intro": "L'assistant ne reconnaît que les questions prédéfinies ci-dessus (texte exact) — toute autre formulation renverra un message d'incompréhension.",
+  "question_non_reconnue": "Je ne comprends pas cette question. Essayez l'une des questions prédéfinies ci-dessus, avec exactement le même texte.",
 
   "top_clients_risque": "Top 10 clients à risque",
   "profil_client": "Profil client",
@@ -87,6 +90,13 @@
   "canal_prefere": "Canal préféré",
   "internet_banking_active": "Banque en ligne activée",
   "mobile_money_lie": "Mobile Money lié",
+  "solde_total": "Solde total (FCFA)",
+  "anciennete_jours": "Ancienneté (jours)",
+  "canal_bancaire_principal": "Canal bancaire principal",
+  "transactions_30_jours": "Transactions (30 jours)",
+  "transactions_90_jours": "Transactions (90 jours)",
+  "tendance_3_mois": "Tendance sur 3 mois",
+  "retard_maximum_jours": "Retard maximum (jours)",
 
   "page_accueil_intro": "Vue d'ensemble du portefeuille et de l'état du pipeline de données.",
   "page_portefeuille_intro": "Composition du portefeuille clients par segment, risque et géographie.",
@@ -94,7 +104,50 @@
   "page_retention_intro": "Clients à risque de désengagement, priorisés pour l'action commerciale.",
   "page_360_intro": "Fiche complète d'un client : profil, comportement, risque, actions recommandées.",
   "page_opportunites_intro": "Clients à cibler pour le cross-sell et l'upsell.",
-  "page_ia_intro": "Comparaison des modèles de scoring et explication des résultats.",
+  "page_ia_intro": "Comment le score de risque est calculé, expliqué simplement.",
   "page_assistant_intro": "Posez une question en langage naturel sur le portefeuille.",
-  "page_admin_intro": "Zone réservée aux administrateurs — état technique du pipeline et des logs."
+  "page_admin_intro": "Zone réservée aux administrateurs — état technique du pipeline et des logs.",
+
+  "voir_la_liste": "Voir la liste",
+  "alerte_risque_eleve": "{pct} des clients présentent un risque crédit élevé — {n} clients à forte valeur nécessitent une attention particulière.",
+  "alerte_reclamations": "{n} clients risquent de partir suite à une réclamation non résolue.",
+  "statut_pipeline_ok": "Données à jour",
+  "statut_pipeline_echec": "Échec du pipeline",
+  "statut_pipeline_inconnu": "Aucune exécution enregistrée",
+
+  "titre_etude_modeles": "Étude comparative des modèles (technique)",
+  "ia_intro_texte_1": "Le score de risque de chaque client n'est pas une boîte noire : c'est une somme pondérée de 4 facteurs métier, calculée par un moteur de règles explicite.",
+  "ia_intro_texte_2": "Poids de chaque facteur dans le score final :",
+  "ia_note_admin": "L'étude technique comparant plusieurs modèles de machine learning (indicateurs AUC, precision, recall) reste disponible pour les profils techniques dans l'onglet Administration.",
+  "facteur_recence": "Récence d'activité",
+  "facteur_reclamations": "Réclamations",
+  "facteur_digital": "Engagement digital",
+  "facteur_tendance": "Tendance d'activité",
+
+  "kpi_clients_actifs": "Clients actifs",
+  "kpi_nbi_estime_total": "NBI estimé annuel total",
+  "kpi_nbi_sous_label": "Revenu bancaire estimé",
+  "kpi_solde_total_gere": "Solde total géré",
+  "kpi_taux_risque_eleve": "Taux risque élevé",
+
+  "titre_scatter_valeur_engagement": "Valeur client vs Engagement — chaque point = 1 client",
+  "annotation_scatter_risque": "Les points en zone rouge représentent {montant} de solde à risque",
+  "zone_vip_inactifs": "Clients VIP inactifs",
+  "zone_a_surveiller": "À surveiller",
+  "zone_clients_actifs": "Clients actifs",
+
+  "titre_pyramide_valeur": "Pyramide de valeur par segment",
+  "annotation_pyramide": "Le segment Premier représente {pct_nbi} du NBI total avec seulement {pct_clients} des clients",
+
+  "tableau_segment_titre": "Récapitulatif par segment",
+  "col_solde_moyen": "Solde moyen",
+  "col_revenu_moyen": "Revenu moyen",
+  "col_taux_actifs": "Taux actifs",
+  "col_score_digital_moyen": "Score digital moyen",
+  "col_action_prioritaire": "Action prioritaire",
+  "action_renforcer_suivi": "Renforcer le suivi risque",
+  "action_campagne_reactivation": "Campagne de réactivation",
+  "action_maintenir_relation": "Maintenir la relation",
+
+  "alerte_risque_solde": "{n} clients présentent un risque crédit élevé — ils représentent {solde} de solde géré."
 }

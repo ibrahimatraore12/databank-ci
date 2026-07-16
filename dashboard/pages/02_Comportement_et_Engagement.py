@@ -11,13 +11,10 @@ import streamlit as st  # noqa: E402
 
 from components.charts import graphique_barres, graphique_histogramme  # noqa: E402
 from components.ui import (  # noqa: E402
-    afficher_entete, afficher_selecteur_langue, format_pct, label_technique, requete_duckdb, t,
+    afficher_entete, afficher_pied_de_page, format_pct, label_technique, requete_duckdb, t,
 )
 
 st.set_page_config(page_title="Comportement et Engagement", page_icon="🏦", layout="wide")
-
-with st.sidebar:
-    afficher_selecteur_langue()
 
 afficher_entete(t("nav_comportement"), t("page_comportement_intro"))
 
@@ -25,13 +22,17 @@ try:
     df = requete_duckdb("SELECT * FROM main_marts.customer_360")
 except Exception:
     st.error(f"{t('erreur_donnees_titre')} {t('erreur_contact_admin')}")
+    afficher_pied_de_page()
     st.stop()
 
 col1, col2, col3 = st.columns(3)
-col1.metric(t("kpi_score_digital_moyen"), f"{df['score_digital'].mean():.1f} / 3")
-col2.metric(t("jours_depuis_derniere_transaction"), f"{df['recency_jours'].median():.0f}")
-taux_tendance_positive = 100 * (df["tendance_transactions"] >= 0).mean()
-col3.metric(t("tendance_activite"), format_pct(taux_tendance_positive))
+with col1, st.container(border=True):
+    st.metric(t("kpi_score_digital_moyen"), f"{df['score_digital'].mean():.1f} / 3")
+with col2, st.container(border=True):
+    st.metric(t("jours_depuis_derniere_transaction"), f"{df['recency_jours'].median():.0f}")
+with col3, st.container(border=True):
+    taux_tendance_positive = 100 * (df["tendance_transactions"] >= 0).mean()
+    st.metric(t("tendance_activite"), format_pct(taux_tendance_positive))
 
 st.divider()
 col_gauche, col_droite = st.columns(2)
@@ -67,3 +68,5 @@ par_segment = par_segment.rename(columns={
     "recency_mediane": label_technique("recency_jours"),
 })
 st.dataframe(par_segment, width='stretch', hide_index=True)
+
+afficher_pied_de_page()

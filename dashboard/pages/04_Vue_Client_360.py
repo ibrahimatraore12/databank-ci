@@ -10,14 +10,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 import streamlit as st  # noqa: E402
 
 from components.ui import (  # noqa: E402
-    afficher_barre_score, afficher_entete, afficher_selecteur_langue,
+    afficher_barre_score, afficher_entete, afficher_pied_de_page,
     format_fcfa, label_technique, requete_duckdb, t,
 )
 
 st.set_page_config(page_title="Vue Client 360", page_icon="🏦", layout="wide")
-
-with st.sidebar:
-    afficher_selecteur_langue()
 
 afficher_entete(t("nav_360"), t("page_360_intro"))
 
@@ -31,6 +28,7 @@ try:
     )
 except Exception:
     st.error(f"{t('erreur_donnees_titre')} {t('erreur_contact_admin')}")
+    afficher_pied_de_page()
     st.stop()
 
 recherche = st.text_input(t("rechercher_client"), placeholder="C0001 ou nom du client")
@@ -44,6 +42,7 @@ if recherche:
 
 if resultats.empty:
     st.info(t("aucun_client_trouve"))
+    afficher_pied_de_page()
     st.stop()
 
 client = resultats.iloc[0]
@@ -88,4 +87,7 @@ badges = {
 }
 colonnes_badges = st.columns(len(badges))
 for colonne, (libelle, valeur) in zip(colonnes_badges, badges.items()):
-    colonne.metric(libelle, "Oui" if valeur else "Non")
+    with colonne, st.container(border=True):
+        st.metric(libelle, "Oui" if valeur else "Non")
+
+afficher_pied_de_page()

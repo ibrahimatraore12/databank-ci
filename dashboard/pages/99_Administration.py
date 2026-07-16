@@ -11,12 +11,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 import streamlit as st  # noqa: E402
 
 import config  # noqa: E402
-from components.ui import afficher_entete, afficher_selecteur_langue, format_run_id, t  # noqa: E402
+from components.ui import (  # noqa: E402
+    afficher_entete, afficher_etapes_pipeline, afficher_pied_de_page, format_run_id, t,
+)
 
 st.set_page_config(page_title="Administration", page_icon="🏦", layout="wide")
-
-with st.sidebar:
-    afficher_selecteur_langue()
 
 afficher_entete(t("nav_admin"), t("page_admin_intro"))
 
@@ -60,6 +59,7 @@ def afficher_derniere_lignes_log(chemin: str, n: int = 20) -> None:
 
 
 if not verifier_mot_de_passe():
+    afficher_pied_de_page()
     st.stop()
 
 st.success(t("acces_autorise"))
@@ -71,7 +71,7 @@ st.subheader(t("etat_pipeline"))
 if etat_pipeline:
     run_id = etat_pipeline.get("last_updated", "—")
     st.caption(f"run_id : {format_run_id(run_id)}")
-    st.json(etat_pipeline)
+    afficher_etapes_pipeline(etat_pipeline)
 else:
     st.info("—")
 
@@ -88,3 +88,13 @@ with onglet_api:
     afficher_derniere_lignes_log(os.path.join(config.LOGS_DIR, "api.log"))
 with onglet_errors:
     afficher_derniere_lignes_log(os.path.join(config.LOGS_DIR, "errors.log"))
+
+st.subheader(t("titre_etude_modeles"))
+chemin_rapport = os.path.join(config.PROJECT_ROOT, "docs", "model_comparison.md")
+try:
+    with open(chemin_rapport, "r", encoding="utf-8") as f:
+        st.markdown(f.read())
+except Exception:
+    st.info("—")
+
+afficher_pied_de_page()

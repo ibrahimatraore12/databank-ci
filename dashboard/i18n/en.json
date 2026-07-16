@@ -48,6 +48,9 @@
   "question_top_risque": "Which customers are the most at risk?",
   "question_cross_sell": "Which customers should we target for cross-sell?",
   "question_kpis": "What are the portfolio's KPIs?",
+  "question_reclamations": "What is the complaints situation?",
+  "questions_comprises_intro": "The assistant only recognizes the predefined questions above (exact wording) — any other phrasing will return an unrecognized-question message.",
+  "question_non_reconnue": "I don't understand this question. Try one of the predefined questions above, using the exact same wording.",
 
   "top_clients_risque": "Top 10 at-risk customers",
   "profil_client": "Customer profile",
@@ -87,6 +90,13 @@
   "canal_prefere": "Preferred channel",
   "internet_banking_active": "Internet banking activated",
   "mobile_money_lie": "Mobile money linked",
+  "solde_total": "Total balance (FCFA)",
+  "anciennete_jours": "Tenure (days)",
+  "canal_bancaire_principal": "Primary banking channel",
+  "transactions_30_jours": "Transactions (30 days)",
+  "transactions_90_jours": "Transactions (90 days)",
+  "tendance_3_mois": "3-month trend",
+  "retard_maximum_jours": "Maximum delinquency (days)",
 
   "page_accueil_intro": "Portfolio overview and data pipeline status.",
   "page_portefeuille_intro": "Customer portfolio composition by segment, risk, and geography.",
@@ -94,7 +104,50 @@
   "page_retention_intro": "Customers at risk of disengagement, prioritized for commercial action.",
   "page_360_intro": "Full customer record: profile, behavior, risk, recommended actions.",
   "page_opportunites_intro": "Customers to target for cross-sell and upsell.",
-  "page_ia_intro": "Scoring model comparison and result explanation.",
+  "page_ia_intro": "How the risk score is calculated, explained simply.",
   "page_assistant_intro": "Ask a natural-language question about the portfolio.",
-  "page_admin_intro": "Administrator-only area — technical pipeline and log status."
+  "page_admin_intro": "Administrator-only area — technical pipeline and log status.",
+
+  "voir_la_liste": "View list",
+  "alerte_risque_eleve": "{pct} of customers show high credit risk — {n} high-value customers need special attention.",
+  "alerte_reclamations": "{n} customers are at risk of leaving due to an unresolved complaint.",
+  "statut_pipeline_ok": "Data up to date",
+  "statut_pipeline_echec": "Pipeline failure",
+  "statut_pipeline_inconnu": "No run recorded",
+
+  "titre_etude_modeles": "Model comparison study (technical)",
+  "ia_intro_texte_1": "Each customer's risk score isn't a black box: it's a weighted sum of 4 business factors, computed by an explicit rules engine.",
+  "ia_intro_texte_2": "Weight of each factor in the final score:",
+  "ia_note_admin": "The technical study comparing several machine learning models (AUC, precision, recall metrics) remains available for technical profiles in the Administration tab.",
+  "facteur_recence": "Activity recency",
+  "facteur_reclamations": "Complaints",
+  "facteur_digital": "Digital engagement",
+  "facteur_tendance": "Activity trend",
+
+  "kpi_clients_actifs": "Active customers",
+  "kpi_nbi_estime_total": "Total estimated annual NBI",
+  "kpi_nbi_sous_label": "Estimated banking revenue",
+  "kpi_solde_total_gere": "Total balance managed",
+  "kpi_taux_risque_eleve": "High risk rate",
+
+  "titre_scatter_valeur_engagement": "Customer value vs Engagement — each point = 1 customer",
+  "annotation_scatter_risque": "Red-zone points represent {montant} of at-risk balance",
+  "zone_vip_inactifs": "Inactive VIP customers",
+  "zone_a_surveiller": "To watch",
+  "zone_clients_actifs": "Active customers",
+
+  "titre_pyramide_valeur": "Value pyramid by segment",
+  "annotation_pyramide": "The Premier segment represents {pct_nbi} of total NBI with only {pct_clients} of customers",
+
+  "tableau_segment_titre": "Segment summary",
+  "col_solde_moyen": "Average balance",
+  "col_revenu_moyen": "Average income",
+  "col_taux_actifs": "Active rate",
+  "col_score_digital_moyen": "Average digital score",
+  "col_action_prioritaire": "Priority action",
+  "action_renforcer_suivi": "Strengthen risk monitoring",
+  "action_campagne_reactivation": "Reactivation campaign",
+  "action_maintenir_relation": "Maintain relationship",
+
+  "alerte_risque_solde": "{n} customers show high credit risk — they represent {solde} of managed balance."
 }
