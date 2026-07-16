@@ -1,5 +1,7 @@
 # Étude comparative de modèles — dataBank CI Customer 360
 
+> *[English version: [model_comparison_en.md](model_comparison_en.md)]*
+
 **Généré automatiquement par `ml/comparison.py` — ne pas éditer à la main.**
 
 - Scénario A : 140 clients réels, 35 positifs (25.0 %)

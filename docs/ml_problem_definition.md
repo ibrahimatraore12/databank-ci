@@ -1,5 +1,7 @@
 # Définition du problème ML — dataBank CI Customer 360
 
+> *[English version: [ml_problem_definition_en.md](ml_problem_definition_en.md)]*
+
 **Auteur :** Ibrahima TRAORÉ — Analytics Engineer
 **Date :** 2026-07-14
 **Statut :** Cadrage initial, avant tout développement

@@ -1,5 +1,7 @@
 # Serveur MCP — dataBank CI Customer 360
 
+> *[English version: [README_MCP_en.md](README_MCP_en.md)]*
+
 Serveur MCP (Model Context Protocol) exposant 5 outils en lecture seule sur
 le portefeuille dataBank CI. Toute connexion DuckDB ouverte par les outils
 est `read_only=True` — aucune écriture n'est possible depuis ce serveur.

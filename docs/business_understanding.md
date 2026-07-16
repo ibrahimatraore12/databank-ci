@@ -1,5 +1,7 @@
 # Compréhension métier — dataBank CI Customer 360
 
+> *[English version: [business_understanding_en.md](business_understanding_en.md)]*
+
 **Auteur :** Ibrahima TRAORÉ — Analytics Engineer
 **Date :** 2026-07-14
 

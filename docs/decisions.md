@@ -1,5 +1,7 @@
 # Journal des décisions de design — dataBank CI Customer 360
 
+> *[English version: [decisions_en.md](decisions_en.md)]*
+
 **Auteur :** Ibrahima TRAORÉ — Analytics Engineer
 
 Format : Date | Décision | Raison | Alternative écartée

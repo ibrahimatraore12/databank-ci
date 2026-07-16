@@ -1,5 +1,7 @@
 # dataBank CI — Customer 360
 
+> *[English version: [README_en.md](README_en.md)]*
+
 Plateforme analytics engineering de bout en bout pour dataBank CI : ingestion,
 qualité des données, transformation dbt, scoring de désengagement client,
 dashboard Streamlit et serveur MCP pour l'exploration en langage naturel.
@@ -9,12 +11,14 @@ dashboard Streamlit et serveur MCP pour l'exploration en langage naturel.
 
 ## Avant de coder : les documents de cadrage
 
-Lire dans l'ordre avant toute modification :
+Lire dans l'ordre avant toute modification (chaque document existe en FR et en EN) :
 
-1. [`docs/business_understanding.md`](docs/business_understanding.md) — décisions métier soutenues, KPIs
-2. [`docs/ml_problem_definition.md`](docs/ml_problem_definition.md) — nature du problème, limites du label, honnêteté sur le déséquilibre de classes
-3. [`docs/decisions.md`](docs/decisions.md) — journal des décisions de design
-4. [`docs/model_comparison.md`](docs/model_comparison.md) — résultats de la comparaison de modèles (généré automatiquement par `ml/comparison.py`)
+| Document | FR | EN |
+|----------|----|----|
+| Compréhension métier — décisions soutenues, KPIs | [FR](docs/business_understanding.md) | [EN](docs/business_understanding_en.md) |
+| Définition du problème ML — nature du problème, limites du label, déséquilibre de classes | [FR](docs/ml_problem_definition.md) | [EN](docs/ml_problem_definition_en.md) |
+| Journal des décisions de design | [FR](docs/decisions.md) | [EN](docs/decisions_en.md) |
+| Comparaison de modèles (généré automatiquement par `ml/comparison.py`) | [FR](docs/model_comparison.md) | [EN](docs/model_comparison_en.md) |
 
 ## Architecture
 
