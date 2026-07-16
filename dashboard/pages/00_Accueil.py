@@ -12,7 +12,7 @@ import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
 import config  # noqa: E402
-from components.charts import graphique_camembert  # noqa: E402
+from components.charts import RISK_COLOR_MAP, SEGMENT_COLOR_MAP, graphique_camembert  # noqa: E402
 from components.ui import (  # noqa: E402
     afficher_entete, afficher_pied_de_page, format_date_longue, format_pct, label_technique, requete_duckdb, t,
 )
@@ -94,14 +94,16 @@ with col_gauche:
     repartition_segment = donnees_customer_360["segment"].value_counts().reset_index()
     repartition_segment.columns = ["segment", "nb_clients"]
     st.plotly_chart(
-        graphique_camembert(repartition_segment, "segment", "nb_clients", label_technique("segment")),
+        graphique_camembert(repartition_segment, "segment", "nb_clients", label_technique("segment"),
+                            color_map=SEGMENT_COLOR_MAP),
         width='stretch',
     )
 with col_droite:
     repartition_risque = donnees_customer_360["risk_band"].value_counts().reset_index()
     repartition_risque.columns = ["risk_band", "nb_clients"]
     st.plotly_chart(
-        graphique_camembert(repartition_risque, "risk_band", "nb_clients", label_technique("risk_band")),
+        graphique_camembert(repartition_risque, "risk_band", "nb_clients", label_technique("risk_band"),
+                            color_map=RISK_COLOR_MAP),
         width='stretch',
     )
 

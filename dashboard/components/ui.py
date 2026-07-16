@@ -165,17 +165,19 @@ def afficher_barre_score(score: float, label: str = "") -> None:
 
 
 def afficher_entete(titre: str, sous_titre: str = "") -> None:
-    # Titre centré avec encadré dégradé, charte visuelle du projet — dégradé
-    # navy vers violet (couleur du segment Premier) avec un fin liseré accent,
-    # plus chaleureux que l'ancien dégradé navy-sur-navy
-    # Centered title with a gradient banner, project visual identity — navy to
-    # purple gradient (Premier segment color) with a thin accent underline,
-    # warmer than the previous navy-on-navy gradient
+    # Titre centré avec encadré dégradé, charte de marque (violet/rose,
+    # inspirée d'Artefact) : navy en amorce, violet, liseré rose en accent —
+    # les mêmes couleurs que components/charts.py::COULEUR_PREMIER/ACCENT,
+    # pour que le bandeau et les graphiques restent visuellement cohérents
+    # Centered title with a gradient banner, brand identity (purple/pink,
+    # Artefact-inspired): navy lead-in, purple, pink accent underline — the
+    # same colors as components/charts.py::COULEUR_PREMIER/ACCENT, so the
+    # banner and the charts stay visually consistent
     st.markdown(
         f"""
-        <div style="background:linear-gradient(135deg,#1A1A2E,#3B1F5C);
+        <div style="background:linear-gradient(135deg,#1A1A2E,#3B1F5C 55%,#6C2EB5);
                     padding:24px;border-radius:10px;text-align:center;margin-bottom:20px;
-                    border-bottom:3px solid #FF4500;">
+                    border-bottom:3px solid #EC0868;">
           <h1 style="color:white;margin:0;">{titre}</h1>
           <p style="color:#dddddd;margin:6px 0 0 0;">{sous_titre}</p>
         </div>

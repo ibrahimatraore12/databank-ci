@@ -13,7 +13,7 @@ import pandas as pd  # noqa: E402
 import streamlit as st  # noqa: E402
 
 from components.charts import (  # noqa: E402
-    COULEUR_ATTENTION, COULEUR_CRITIQUE, COULEUR_POSITIF,
+    COULEUR_ATTENTION, COULEUR_CRITIQUE, COULEUR_POSITIF, RISK_COLOR_MAP, SEGMENT_COLOR_MAP,
     graphique_camembert, graphique_nuage_valeur_engagement, graphique_pyramide_valeur,
 )
 from components.ui import (  # noqa: E402
@@ -143,7 +143,8 @@ with col_gauche:
     repartition_segment["libelle"] = repartition_segment["segment"] + " (" \
         + repartition_segment["nb_clients"].astype(str) + ")"
     st.plotly_chart(
-        graphique_camembert(repartition_segment, "libelle", "nb_clients", label_technique("segment")),
+        graphique_camembert(repartition_segment, "libelle", "nb_clients", label_technique("segment"),
+                            color_col="segment", color_map=SEGMENT_COLOR_MAP),
         width='stretch',
     )
 
@@ -153,7 +154,8 @@ with col_droite:
     repartition_risque["libelle"] = repartition_risque["risk_band"] + " (" \
         + repartition_risque["nb_clients"].astype(str) + ")"
     st.plotly_chart(
-        graphique_camembert(repartition_risque, "libelle", "nb_clients", label_technique("risk_band")),
+        graphique_camembert(repartition_risque, "libelle", "nb_clients", label_technique("risk_band"),
+                            color_col="risk_band", color_map=RISK_COLOR_MAP),
         width='stretch',
     )
 

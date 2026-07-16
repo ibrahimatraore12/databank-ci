@@ -6,22 +6,49 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 COULEUR_SIDEBAR = "#1A1A2E"
-COULEUR_ACCENT = "#FF4500"
+
+# Couleurs de marque (violet/rose), inspirées de la charte Artefact — jamais
+# réutilisées comme couleurs de statut (voir RAG ci-dessous)
+# Brand colors (purple/pink), inspired by the Artefact visual identity — never
+# reused as status colors (see RAG below)
+COULEUR_ACCENT = "#EC0868"
+COULEUR_PREMIER = "#8B5CF6"
+COULEUR_MASS = "#2E86C1"
+COULEUR_TEAL = "#17A398"
+
+# Couleurs RAG (statut de risque uniquement) : jamais réutilisées comme
+# identité de segment ou de catégorie, pour ne jamais mélanger les deux sens
+# RAG colors (risk status only): never reused as segment/category identity,
+# so the two meanings are never conflated
 COULEUR_POSITIF = "#1E8449"
 COULEUR_ATTENTION = "#F39C12"
 COULEUR_CRITIQUE = "#E74C3C"
-COULEUR_PREMIER = "#6C3483"
-COULEUR_MASS = "#2E86C1"
 
-PALETTE_CATEGORIELLE = [COULEUR_SIDEBAR, COULEUR_ACCENT, COULEUR_PREMIER, COULEUR_POSITIF, COULEUR_ATTENTION]
+# Validée par le script six-checks du skill dataviz (lisibilité clair/sombre,
+# séparation CVD) : violet, rose, bleu, sarcelle — jamais le navy (illisible
+# comme couleur de marque catégorielle, réservé aux fonds/en-têtes)
+# Validated by the dataviz skill's six-checks script (light/dark legibility,
+# CVD separation): purple, pink, blue, teal — never navy (illegible as a
+# categorical brand color, reserved for backgrounds/headers)
+PALETTE_CATEGORIELLE = [COULEUR_PREMIER, COULEUR_ACCENT, COULEUR_MASS, COULEUR_TEAL]
 
 # Mapping fixe segment -> couleur, partagé par tous les graphiques qui distinguent les segments
 # Fixed segment -> color mapping, shared by every chart that breaks down by segment
 SEGMENT_COLOR_MAP = {
     "Mass": COULEUR_MASS,
-    "Affluent": COULEUR_POSITIF,
+    "Affluent": COULEUR_TEAL,
     "Premier": COULEUR_PREMIER,
-    "Youth": COULEUR_ATTENTION,
+    "Youth": COULEUR_ACCENT,
+}
+
+# Mapping fixe niveau de risque -> couleur RAG, pour que High soit toujours
+# rouge et jamais une couleur de marque tirée au hasard dans l'ordre des données
+# Fixed risk level -> RAG color mapping, so High is always red and never a
+# brand color picked arbitrarily from the data's row order
+RISK_COLOR_MAP = {
+    "Low": COULEUR_POSITIF,
+    "Medium": COULEUR_ATTENTION,
+    "High": COULEUR_CRITIQUE,
 }
 
 
@@ -39,10 +66,23 @@ def graphique_barres(df: pd.DataFrame, x: str, y: str, titre: str = "") -> go.Fi
     return _theme_transparent(fig)
 
 
-def graphique_camembert(df: pd.DataFrame, labels: str, values: str, titre: str = "") -> go.Figure:
-    # Diagramme circulaire pour une répartition catégorielle
-    # Pie chart for a categorical breakdown
-    fig = px.pie(df, names=labels, values=values, title=titre, color_discrete_sequence=PALETTE_CATEGORIELLE)
+def graphique_camembert(
+    df: pd.DataFrame, labels: str, values: str, titre: str = "", color_col: str = None, color_map: dict = None,
+) -> go.Figure:
+    # Diagramme circulaire pour une répartition catégorielle ; color_col + color_map
+    # permettent de fixer une couleur par valeur exacte (ex: RISK_COLOR_MAP sur la
+    # colonne brute risk_band) plutôt que sur l'ordre des données ou un libellé
+    # d'affichage qui inclut le décompte (ex: "High (38)")
+    # Pie chart for a categorical breakdown; color_col + color_map let the caller fix
+    # a color per exact value (e.g. RISK_COLOR_MAP on the raw risk_band column) rather
+    # than the data's row order or a display label that includes the count (e.g. "High (38)")
+    if color_map:
+        fig = px.pie(
+            df, names=labels, values=values, title=titre,
+            color=color_col or labels, color_discrete_map=color_map,
+        )
+    else:
+        fig = px.pie(df, names=labels, values=values, title=titre, color_discrete_sequence=PALETTE_CATEGORIELLE)
     return _theme_transparent(fig)
 
 
@@ -113,6 +153,6 @@ def graphique_pyramide_valeur(
     )
     fig = px.bar(
         df_long, x="valeur", y=segment_col, color="metrique", orientation="h", barmode="group", title=titre,
-        color_discrete_map={solde_col: COULEUR_SIDEBAR, nbi_col: COULEUR_POSITIF}, labels=labels or {},
+        color_discrete_map={solde_col: COULEUR_PREMIER, nbi_col: COULEUR_ACCENT}, labels=labels or {},
     )
     return _theme_transparent(fig)
