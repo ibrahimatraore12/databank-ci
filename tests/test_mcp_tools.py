@@ -4,7 +4,7 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "mcp"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "mcp_server"))
 
 from tools.complaints import get_complaint_analysis  # noqa: E402
 from tools.customers import get_at_risk_customers, get_customer_profile  # noqa: E402

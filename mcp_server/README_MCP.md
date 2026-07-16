@@ -14,30 +14,41 @@ est `read_only=True` — aucune écriture n'est possible depuis ce serveur.
 | `outil_kpis_portefeuille` | KPIs agrégés du portefeuille | `segment` (optionnel) |
 | `outil_analyse_reclamations` | Analyse des réclamations par sévérité et statut | `category` (optionnel) |
 
-La logique métier de chaque outil vit dans `mcp/tools/customers.py`,
-`mcp/tools/portfolio.py` et `mcp/tools/complaints.py` — ces modules sont
-utilisés à la fois par le serveur MCP et par la page
-`dashboard/pages/07_Assistant_IA.py`, pour ne jamais dupliquer les requêtes.
+La logique métier de chaque outil vit dans `mcp_server/tools/customers.py`,
+`mcp_server/tools/portfolio.py` et `mcp_server/tools/complaints.py`. La page
+`dashboard/pages/07_Assistant_IA.py` n'importe plus ces modules directement :
+elle appelle le serveur MCP déployé via `dashboard/components/mcp_client.py`,
+en HTTP (transport `streamable-http`), pour que les réponses passent
+réellement par le protocole MCP plutôt que par un appel de fonction en
+mémoire.
 
 ## Lancer le serveur
 
 ```bash
 cd databank-ci
 pyenv activate databank-ci-env
-python3 mcp/databank_mcp_server.py
+python3 mcp_server/databank_mcp_server.py
 ```
 
-Le serveur communique en stdio (protocole MCP standard) — il attend une
-connexion d'un client MCP (Claude Desktop, Claude Code, etc.).
+Par défaut le serveur communique en stdio (protocole MCP standard) — il
+attend une connexion d'un client MCP (Claude Desktop, Claude Code, etc.).
+En production (Cloud Run), il tourne en `streamable-http` :
 
-## Configuration client (exemple Claude Desktop)
+```bash
+MCP_TRANSPORT=streamable-http MCP_API_KEY=<clé> PORT=8080 python3 mcp_server/databank_mcp_server.py
+```
+
+Chaque requête HTTP doit alors porter l'en-tête `X-API-Key: <clé>` — voir
+`ApiKeyMiddleware` dans `databank_mcp_server.py`.
+
+## Configuration client (exemple Claude Desktop, en local)
 
 ```json
 {
   "mcpServers": {
     "databank-ci": {
       "command": "python3",
-      "args": ["/chemin/absolu/vers/databank-ci/mcp/databank_mcp_server.py"]
+      "args": ["/chemin/absolu/vers/databank-ci/mcp_server/databank_mcp_server.py"]
     }
   }
 }
@@ -45,10 +56,9 @@ connexion d'un client MCP (Claude Desktop, Claude Code, etc.).
 
 ## Note d'implémentation
 
-Le dossier s'appelle `mcp/`, comme le paquet Python `mcp` installé via
-`pip install mcp` (le SDK officiel). Pour éviter toute collision de nom :
-- `databank_mcp_server.py` importe le SDK (`from mcp.server.fastmcp import FastMCP`)
-  avant toute manipulation de `sys.path`, donc la résolution du nom `mcp`
-  pointe sans ambiguïté vers le SDK installé dans l'environnement.
-- Les imports internes au serveur utilisent des chemins relatifs au dossier
-  (`from tools.customers import ...`), jamais `from mcp.tools... import ...`.
+Le dossier a été renommé `mcp_server/` (et non `mcp/`) précisément pour
+éviter toute collision avec le paquet Python `mcp` installé via
+`pip install mcp` (le SDK officiel) : le dashboard Streamlit ajoute la
+racine du projet à `sys.path`, et un dossier `mcp/` à la racine aurait
+shadowé le vrai SDK dès que le dashboard aurait tenté `import mcp` pour
+parler au serveur distant.
