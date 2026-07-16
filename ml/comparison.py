@@ -79,6 +79,8 @@ def _generer_rapport_markdown(rapport: pd.DataFrame, df_reel: pd.DataFrame, df_e
     lignes = [
         "# Étude comparative de modèles — dataBank CI Customer 360",
         "",
+        "> *[English version: [model_comparison_en.md](model_comparison_en.md)]*",
+        "",
         "**Généré automatiquement par `ml/comparison.py` — ne pas éditer à la main.**",
         "",
         f"- Scénario A : {len(df_reel)} clients réels, {int(df_reel['churn_flag'].sum())} positifs "
