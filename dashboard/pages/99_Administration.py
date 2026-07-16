@@ -3,6 +3,7 @@
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 
@@ -23,6 +24,64 @@ st.set_page_config(page_title="Administration", page_icon="🏦", layout="wide")
 afficher_entete(t("nav_admin"), t("page_admin_intro"))
 
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "databank-admin")
+
+# Colonnes que dbt_project/models/staging/*.sql lit réellement dans chaque feuille
+# (is_synthetic exclu : ajoutée automatiquement par pipelines/run_pipeline.py si
+# absente, jamais attendue dans un fichier uploadé) — sert à détecter un fichier
+# structurellement incompatible avec le pipeline avant de lancer quoi que ce soit
+# Columns dbt_project/models/staging/*.sql actually reads from each sheet
+# (is_synthetic excluded: added automatically by pipelines/run_pipeline.py when
+# missing, never expected in an uploaded file) — used to detect a file that's
+# structurally incompatible with the pipeline before running anything
+COLONNES_ATTENDUES_PAR_FEUILLE = {
+    "Customers": [
+        "customer_id", "full_name", "gender", "date_of_birth", "city", "district", "occupation",
+        "segment", "monthly_income_xof", "onboarding_date", "primary_branch_id", "preferred_channel",
+        "mobile_app_active", "internet_banking_active", "mobile_money_linked", "kyc_level",
+        "risk_band", "marketing_opt_in", "last_contact_date", "marital_status",
+    ],
+    "Accounts": [
+        "account_id", "customer_id", "account_type", "currency", "open_date", "status", "branch_id",
+        "avg_balance_90d_xof", "current_balance_xof", "salary_domiciled_flag", "overdraft_limit_xof",
+    ],
+    "Transactions": [
+        "txn_id", "account_id", "customer_id", "txn_datetime", "txn_type", "channel_id",
+        "merchant_category", "amount_xof", "direction", "counterparty_type", "city",
+        "is_international", "is_disputed",
+    ],
+    "Loans": [
+        "loan_id", "customer_id", "repayment_account_id", "loan_type", "origination_date",
+        "principal_xof", "interest_rate_pct", "term_months", "monthly_installment_xof",
+        "outstanding_balance_xof", "days_past_due", "status", "purpose", "collateral_flag",
+        "next_due_date",
+    ],
+    "Cards": [
+        "card_id", "customer_id", "account_id", "card_type", "card_tier", "network", "issue_date",
+        "expiry_date", "status", "contactless_flag", "ecommerce_enabled", "monthly_spend_90d_xof",
+    ],
+    "Branches": ["branch_id", "branch_name", "city", "district", "branch_type"],
+    "Channels": ["channel_id", "channel_name", "channel_group", "description"],
+    "Interactions": [
+        "interaction_id", "customer_id", "interaction_datetime", "channel", "interaction_type",
+        "topic", "sentiment", "resolved_flag", "resolution_time_hours", "agent_team", "notes",
+    ],
+    "Complaints": [
+        "complaint_id", "customer_id", "opened_date", "closed_date", "category", "severity",
+        "status", "root_cause", "compensation_xof", "free_text",
+    ],
+    "Offers": [
+        "offer_id", "customer_id", "offer_date", "offer_type", "channel", "accepted_flag",
+        "product_target", "expected_value_xof",
+    ],
+}
+
+# Fichiers modifiés par relancer_pipeline_complet : sauvegardés avant, restaurés si
+# le pipeline échoue en cours de route (fichier incompatible détecté trop tard,
+# panne dbt...), pour que l'instance ne reste jamais dans un état partiel/cassé
+# Files modified by relancer_pipeline_complet: backed up before, restored if the
+# pipeline fails partway (incompatible file caught too late, dbt failure...), so
+# the instance never stays in a partial/broken state
+FICHIERS_PROTEGES_AVANT_RECALCUL = [config.SOURCE_EXCEL_PATH, config.DUCKDB_PATH, config.PIPELINE_STATE_PATH]
 
 
 def verifier_mot_de_passe() -> bool:
@@ -52,17 +111,29 @@ def charger_json(chemin: str) -> dict:
 
 def valider_fichier_uploade(fichier) -> list:
     # Même contrôle que src/ingest.py::load_source_tables (feuille non vide,
-    # taux de valeurs nulles), mais sans jamais lever : on veut le rapport
-    # complet des 10 feuilles, pas un arrêt à la première erreur
+    # taux de valeurs nulles), plus une vérification des colonnes attendues par
+    # dbt (COLONNES_ATTENDUES_PAR_FEUILLE) — sans quoi un fichier avec les bons
+    # noms de feuilles mais des colonnes incompatibles ne serait détecté qu'après
+    # ~55 secondes de recalcul, au milieu de dbt run. Ne lève jamais : on veut le
+    # rapport complet des 10 feuilles, pas un arrêt à la première erreur
     # Same check as src/ingest.py::load_source_tables (non-empty sheet, null
-    # rate), but never raising: we want the full 10-sheet report, not a stop
-    # at the first error
+    # rate), plus a check of the columns dbt actually expects
+    # (COLONNES_ATTENDUES_PAR_FEUILLE) — without it, a file with the right sheet
+    # names but incompatible columns would only be caught ~55 seconds into the
+    # recompute, mid-way through dbt run. Never raises: we want the full 10-sheet
+    # report, not a stop at the first error
     rapports = []
     for nom_feuille in config.SOURCE_SHEETS:
         try:
             df = pd.read_excel(fichier, sheet_name=nom_feuille)
             taux_nuls = round(100 * df.isna().sum().sum() / max(df.size, 1), 2)
             erreurs = [t("feuille_vide")] if df.empty else []
+
+            colonnes_attendues = COLONNES_ATTENDUES_PAR_FEUILLE.get(nom_feuille, [])
+            colonnes_manquantes = [c for c in colonnes_attendues if c not in df.columns]
+            if colonnes_manquantes:
+                erreurs.append(t("colonnes_manquantes").format(colonnes=", ".join(colonnes_manquantes)))
+
             rapports.append({
                 "table": nom_feuille, "lignes": len(df), "taux_nuls_pct": taux_nuls, "erreurs": ", ".join(erreurs),
             })
@@ -74,38 +145,69 @@ def valider_fichier_uploade(fichier) -> list:
     return rapports
 
 
+def _sauvegarder_avant_recalcul() -> dict:
+    sauvegardes = {}
+    for chemin in FICHIERS_PROTEGES_AVANT_RECALCUL:
+        if os.path.exists(chemin):
+            chemin_backup = chemin + ".backup_avant_recalcul"
+            shutil.copy2(chemin, chemin_backup)
+            sauvegardes[chemin] = chemin_backup
+    return sauvegardes
+
+
+def _restaurer_et_nettoyer(sauvegardes: dict, restaurer: bool) -> None:
+    for chemin, chemin_backup in sauvegardes.items():
+        if restaurer:
+            shutil.copy2(chemin_backup, chemin)
+        os.remove(chemin_backup)
+
+
 def relancer_pipeline_complet(fichier) -> bool:
     # Écrit le fichier uploadé à la place du fichier source, puis rejoue tout le
     # pipeline dans le processus courant : ingestion+enrichissement (Python),
     # dbt run (sous-processus, même commande que le Dockerfile), puis ML.
+    # Les fichiers touchés sont sauvegardés avant : si le pipeline échoue en
+    # cours de route (fichier incompatible passé au travers de la validation,
+    # panne dbt...), ils sont restaurés pour que cette instance ne reste pas
+    # dans un état partiel — l'admin voit l'erreur, rien d'autre ne change.
     # Persiste ensuite le résultat sur GCS pour que ça survive au redémarrage de
     # cette instance et soit repris par les autres — un échec de cette dernière
     # étape est logué mais ne fait pas échouer le recalcul (déjà réel localement)
     # Writes the uploaded file over the source file, then replays the whole
     # pipeline in the current process: ingestion+enrichment (Python), dbt run
-    # (subprocess, same command as the Dockerfile), then ML. Then persists the
-    # result to GCS so it survives this instance's restart and is picked up by
-    # the others — a failure of this last step is logged but doesn't fail the
-    # recompute (already real locally)
+    # (subprocess, same command as the Dockerfile), then ML. The affected files
+    # are backed up beforehand: if the pipeline fails partway (an incompatible
+    # file slipping past validation, a dbt failure...), they're restored so
+    # this instance doesn't stay in a partial state — the admin sees the
+    # error, nothing else changes. Then persists the result to GCS so it
+    # survives this instance's restart and is picked up by the others — a
+    # failure of this last step is logged but doesn't fail the recompute
+    # (already real locally)
     from pipelines.run_ml_pipeline import run_ml_pipeline
     from pipelines.run_pipeline import run_pipeline
     from src.storage_sync import televerser_vers_gcs
 
-    fichier.seek(0)
-    with open(config.SOURCE_EXCEL_PATH, "wb") as f:
-        f.write(fichier.read())
+    sauvegardes = _sauvegarder_avant_recalcul()
+    try:
+        fichier.seek(0)
+        with open(config.SOURCE_EXCEL_PATH, "wb") as f:
+            f.write(fichier.read())
 
-    run_pipeline()
+        run_pipeline()
 
-    dbt_dir = os.path.join(config.PROJECT_ROOT, "dbt_project")
-    resultat = subprocess.run(
-        ["dbt", "run"], cwd=dbt_dir, env={**os.environ, "DBT_PROFILES_DIR": dbt_dir},
-        capture_output=True, text=True, timeout=120,
-    )
-    if resultat.returncode != 0:
-        raise RuntimeError(resultat.stderr[-1000:] or resultat.stdout[-1000:])
+        dbt_dir = os.path.join(config.PROJECT_ROOT, "dbt_project")
+        resultat = subprocess.run(
+            ["dbt", "run"], cwd=dbt_dir, env={**os.environ, "DBT_PROFILES_DIR": dbt_dir},
+            capture_output=True, text=True, timeout=120,
+        )
+        if resultat.returncode != 0:
+            raise RuntimeError(resultat.stderr[-1000:] or resultat.stdout[-1000:])
 
-    run_ml_pipeline()
+        run_ml_pipeline()
+    except Exception:
+        _restaurer_et_nettoyer(sauvegardes, restaurer=True)
+        raise
+    _restaurer_et_nettoyer(sauvegardes, restaurer=False)
 
     try:
         televerser_vers_gcs()

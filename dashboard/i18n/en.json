@@ -164,6 +164,7 @@
   "recalcul_echec": "Recompute failed. Technical detail below.",
   "feuille_vide": "empty sheet",
   "feuille_illisible": "sheet not found or unreadable",
+  "colonnes_manquantes": "missing columns: {colonnes}",
   "col_feuille": "Sheet",
   "col_lignes": "Rows",
   "col_taux_nuls": "Null rate",

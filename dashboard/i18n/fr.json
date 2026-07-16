@@ -164,6 +164,7 @@
   "recalcul_echec": "Échec du recalcul. Détail technique ci-dessous.",
   "feuille_vide": "feuille vide",
   "feuille_illisible": "feuille introuvable ou illisible",
+  "colonnes_manquantes": "colonnes manquantes : {colonnes}",
   "col_feuille": "Feuille",
   "col_lignes": "Lignes",
   "col_taux_nuls": "Taux de valeurs nulles",
