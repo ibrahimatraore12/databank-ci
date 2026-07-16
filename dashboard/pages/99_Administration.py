@@ -3,6 +3,7 @@
 
 import json
 import os
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -70,6 +71,35 @@ def valider_fichier_uploade(fichier) -> list:
                 "erreurs": f"{t('feuille_illisible')} : {erreur}",
             })
     return rapports
+
+
+def relancer_pipeline_complet(fichier) -> None:
+    # Écrit le fichier uploadé à la place du fichier source, puis rejoue tout le
+    # pipeline dans le processus courant : ingestion+enrichissement (Python),
+    # dbt run (sous-processus, même commande que le Dockerfile), puis ML.
+    # Effet confiné à l'instance Cloud Run en cours — rien n'est persistant
+    # Writes the uploaded file over the source file, then replays the whole
+    # pipeline in the current process: ingestion+enrichment (Python), dbt run
+    # (subprocess, same command as the Dockerfile), then ML. Effect confined
+    # to the current Cloud Run instance — nothing is persistent
+    from pipelines.run_ml_pipeline import run_ml_pipeline
+    from pipelines.run_pipeline import run_pipeline
+
+    fichier.seek(0)
+    with open(config.SOURCE_EXCEL_PATH, "wb") as f:
+        f.write(fichier.read())
+
+    run_pipeline()
+
+    dbt_dir = os.path.join(config.PROJECT_ROOT, "dbt_project")
+    resultat = subprocess.run(
+        ["dbt", "run"], cwd=dbt_dir, env={**os.environ, "DBT_PROFILES_DIR": dbt_dir},
+        capture_output=True, text=True, timeout=120,
+    )
+    if resultat.returncode != 0:
+        raise RuntimeError(resultat.stderr[-1000:] or resultat.stdout[-1000:])
+
+    run_ml_pipeline()
 
 
 def afficher_derniere_lignes_log(chemin: str, n: int = 20) -> None:
@@ -142,5 +172,13 @@ if fichier_uploade is not None:
 
     if nb_erreurs == 0:
         st.info(t("upload_instructions"))
+        if st.button(t("recalculer_maintenant")):
+            try:
+                with st.spinner(t("recalcul_en_cours")):
+                    relancer_pipeline_complet(fichier_uploade)
+                st.success(t("recalcul_succes"))
+            except Exception as erreur:
+                st.error(t("recalcul_echec"))
+                st.code(str(erreur)[:1000], language="text")
 
 afficher_pied_de_page()
