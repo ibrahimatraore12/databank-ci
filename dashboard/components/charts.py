@@ -7,9 +7,9 @@ import plotly.graph_objects as go
 
 COULEUR_SIDEBAR = "#1A1A2E"
 
-# Couleurs de marque (violet/rose), inspirées de la charte Artefact — jamais
+# Couleurs de marque (violet/rose), inspirées de la charte Artefact - jamais
 # réutilisées comme couleurs de statut (voir RAG ci-dessous)
-# Brand colors (purple/pink), inspired by the Artefact visual identity — never
+# Brand colors (purple/pink), inspired by the Artefact visual identity - never
 # reused as status colors (see RAG below)
 COULEUR_ACCENT = "#EC0868"
 COULEUR_PREMIER = "#8B5CF6"
@@ -24,17 +24,17 @@ COULEUR_POSITIF = "#1E8449"
 COULEUR_ATTENTION = "#F39C12"
 COULEUR_CRITIQUE = "#E74C3C"
 
-# Couleur CTA de la charte Artefact — réservée aux barres d'action prioritaire,
+# Couleur CTA de la charte Artefact - réservée aux barres d'action prioritaire,
 # jamais une identité de segment ni un statut RAG (évite toute ambiguïté de sens)
-# Artefact CTA color — reserved for priority-action bars, never a segment
+# Artefact CTA color - reserved for priority-action bars, never a segment
 # identity nor a RAG status (avoids any ambiguity of meaning)
 COULEUR_ORANGE_ACTION = "#FF4500"
 
 # Validée par le script six-checks du skill dataviz (lisibilité clair/sombre,
-# séparation CVD) : violet, rose, bleu, sarcelle — jamais le navy (illisible
+# séparation CVD) : violet, rose, bleu, sarcelle - jamais le navy (illisible
 # comme couleur de marque catégorielle, réservé aux fonds/en-têtes)
 # Validated by the dataviz skill's six-checks script (light/dark legibility,
-# CVD separation): purple, pink, blue, teal — never navy (illegible as a
+# CVD separation): purple, pink, blue, teal - never navy (illegible as a
 # categorical brand color, reserved for backgrounds/headers)
 PALETTE_CATEGORIELLE = [COULEUR_PREMIER, COULEUR_ACCENT, COULEUR_MASS, COULEUR_TEAL]
 

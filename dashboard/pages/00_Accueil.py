@@ -1,5 +1,5 @@
-# Page d'accueil — KPIs de synthèse, alerte VIP, vue instantanée du portefeuille
-# Home page — summary KPIs, VIP alert, at-a-glance portfolio view
+# Page d'accueil - KPIs de synthèse, alerte VIP, vue instantanée du portefeuille
+# Home page - summary KPIs, VIP alert, at-a-glance portfolio view
 
 import json
 import os
@@ -34,8 +34,8 @@ def charger_etat_pipeline() -> dict:
 
 
 def afficher_kpis_synthese(df: pd.DataFrame) -> None:
-    # 4 cartes KPI à seuil RAG — diagnostic immédiat de la santé du portefeuille
-    # 4 RAG-thresholded KPI cards — immediate portfolio health diagnosis
+    # 4 cartes KPI à seuil RAG - diagnostic immédiat de la santé du portefeuille
+    # 4 RAG-thresholded KPI cards - immediate portfolio health diagnosis
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -69,10 +69,10 @@ def afficher_kpis_synthese(df: pd.DataFrame) -> None:
 
 
 def afficher_alerte_vip(df: pd.DataFrame) -> None:
-    # Alerte rouge si des clients Premier affichent un score de risque critique —
+    # Alerte rouge si des clients Premier affichent un score de risque critique -
     # le signal le plus coûteux à manquer (forte valeur + départ imminent) ;
     # n'apparaît que si la condition est réellement vraie sur les données
-    # Red alert if Premier customers show a critical risk score — the costliest
+    # Red alert if Premier customers show a critical risk score - the costliest
     # signal to miss (high value + imminent departure); only shows when the
     # condition actually holds in the data
     vip_a_risque = df[(df["segment"] == "Premier") & (df["risque_composite"] > 70)]
@@ -89,10 +89,10 @@ def afficher_alerte_vip(df: pd.DataFrame) -> None:
 
 def afficher_alerte_opportunites(df: pd.DataFrame) -> None:
     # Alerte verte symétrique à l'alerte VIP : le tableau de bord doit montrer
-    # aussi ce qui va bien et ce qu'il y a à gagner, pas seulement les risques —
+    # aussi ce qui va bien et ce qu'il y a à gagner, pas seulement les risques -
     # calculée sur les mêmes signaux réels que la page Opportunités
     # Green alert symmetric to the VIP alert: the dashboard must also surface
-    # what's going well and what there is to gain, not just risks — computed
+    # what's going well and what there is to gain, not just risks - computed
     # from the same real signals as the Opportunities page
     opportunites = df[df["is_cross_sell_target"] | df["is_salary_upsell_opportunity"]]
     if len(opportunites) == 0:
@@ -107,9 +107,9 @@ def afficher_alerte_opportunites(df: pd.DataFrame) -> None:
 
 
 def graphique_scatter_accueil(df: pd.DataFrame):
-    # Nuage de points valeur vs engagement avec zones vert/ambre/rouge en fond —
+    # Nuage de points valeur vs engagement avec zones vert/ambre/rouge en fond -
     # priorise visuellement les clients à valeur qui se désengagent
-    # Value vs engagement scatter with green/amber/red background zones —
+    # Value vs engagement scatter with green/amber/red background zones -
     # visually surfaces valuable customers who are disengaging
     labels = {
         "recency_jours": label_technique("recency_jours"),
@@ -139,9 +139,9 @@ def graphique_scatter_accueil(df: pd.DataFrame):
 
 def graphique_top_actions(df: pd.DataFrame):
     # Classement des 5 actions les plus prioritaires, issu des données réelles
-    # (pas de texte figé) — couleur CTA orange, distincte des couleurs de segment
+    # (pas de texte figé) - couleur CTA orange, distincte des couleurs de segment
     # Ranking of the 5 highest-priority actions, computed from real data
-    # (no hardcoded text) — orange CTA color, distinct from segment colors
+    # (no hardcoded text) - orange CTA color, distinct from segment colors
     actions = pd.DataFrame([
         {"action": t("action_sans_carte"), "n": int((df["nb_cartes"] == 0).sum())},
         {"action": t("action_risque_credit_eleve"), "n": int((df["risk_band"] == "High").sum())},

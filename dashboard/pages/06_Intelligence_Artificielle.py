@@ -1,6 +1,6 @@
-# Intelligence Artificielle — transparence sur le calcul du score de risque :
+# Intelligence Artificielle - transparence sur le calcul du score de risque :
 # quelles variables comptent, comment le modèle a été évalué, quoi faire du résultat
-# Artificial Intelligence — transparency on how the risk score is computed:
+# Artificial Intelligence - transparency on how the risk score is computed:
 # which variables matter, how the model was evaluated, what to do with the result
 
 import os
@@ -36,10 +36,10 @@ except Exception:
 @st.cache_resource
 def _evaluer_modele_en_direct():
     # Rejoue le split déterministe (seed fixe) pour obtenir un vrai ROC/PSI sans
-    # ré-entraîner — mis en cache process (une seule fois par instance, coûte
+    # ré-entraîner - mis en cache process (une seule fois par instance, coûte
     # quelques centaines de ms) ; retourne None si le modèle n'est pas encore entraîné
     # Replays the deterministic split (fixed seed) to get a real ROC/PSI without
-    # retraining — process-cached (once per instance, costs a few hundred ms);
+    # retraining - process-cached (once per instance, costs a few hundred ms);
     # returns None if the model isn't trained yet
     try:
         from ml.data import get_X_y, load_data, preprocess_data, split_data
@@ -67,7 +67,7 @@ def _evaluer_modele_en_direct():
 evaluation = _evaluer_modele_en_direct()
 
 nb_synthetiques = int(df["is_synthetic"].sum())
-auc_affiche = f"{evaluation['roc']['auc']:.3f}" if evaluation and evaluation["roc"]["auc"] else "—"
+auc_affiche = f"{evaluation['roc']['auc']:.3f}" if evaluation and evaluation["roc"]["auc"] else "-"
 texte_transparence = t("encadre_transparence_ia").format(
     n=len(df), pct=format_pct(100 * nb_synthetiques / len(df)), auc=auc_affiche,
 )
@@ -80,14 +80,14 @@ with col1:
 with col2:
     auc = evaluation["roc"]["auc"] if evaluation else None
     type_carte = "success" if auc and auc > 0.75 else "warning" if auc else ""
-    afficher_carte_kpi(t("kpi_auc"), f"{auc:.3f}" if auc else "—", "", type_carte)
+    afficher_carte_kpi(t("kpi_auc"), f"{auc:.3f}" if auc else "-", "", type_carte)
 with col3:
     recall = evaluation["roc"]["tpr_seuil"] if evaluation else None
-    afficher_carte_kpi(t("kpi_recall_churners"), format_pct(100 * recall) if recall else "—")
+    afficher_carte_kpi(t("kpi_recall_churners"), format_pct(100 * recall) if recall else "-")
 with col4:
     psi = evaluation["psi"] if evaluation else None
     type_carte = "success" if psi is not None and psi < 0.2 else "warning" if psi is not None else ""
-    afficher_carte_kpi(t("kpi_drift_psi"), f"{psi:.3f}" if psi is not None else "—", "", type_carte)
+    afficher_carte_kpi(t("kpi_drift_psi"), f"{psi:.3f}" if psi is not None else "-", "", type_carte)
 
 onglet_variables, onglet_performance, onglet_actions = st.tabs([
     t("onglet_variables_explicatives"), t("onglet_performance_modele"), t("onglet_actions_ia"),
@@ -141,7 +141,7 @@ with onglet_performance:
                 seuil=roc["seuil_retenu"], precision=format_pct(100 * roc["precision_seuil"]),
             ))
         else:
-            st.info("—")
+            st.info("-")
 
     with col_scenarios:
         st.markdown(f"**{t('titre_comparaison_scenarios')}**")
@@ -154,7 +154,7 @@ with onglet_performance:
             if debut != -1 and fin != -1:
                 st.markdown(contenu[debut:fin].strip())
         except Exception:
-            st.info("—")
+            st.info("-")
         st.caption(t("note_scenarios"))
 
 with onglet_actions:
@@ -190,23 +190,23 @@ with onglet_actions:
 
         lignes = []
         for run in runs:
-            dataset = run.data.tags.get("dataset", "—")
-            modele = run.data.tags.get("model_type", "—")
+            dataset = run.data.tags.get("dataset", "-")
+            modele = run.data.tags.get("model_type", "-")
             est_champion = modele == "LogisticRegression" and "540" in dataset
             lignes.append({
                 t("col_version"): run.info.run_id[:8], t("col_date"): pd.Timestamp(
                     run.info.start_time, unit="ms",
                 ).strftime("%d/%m/%Y %H:%M"),
-                t("kpi_auc"): run.data.metrics.get("auc", "—"), t("kpi_recall_churners"): run.data.metrics.get(
-                    "recall", "—",
+                t("kpi_auc"): run.data.metrics.get("auc", "-"), t("kpi_recall_churners"): run.data.metrics.get(
+                    "recall", "-",
                 ),
                 t("col_dataset"): dataset, t("col_statut"): f"🏆 {t('badge_champion')}" if est_champion else modele,
             })
         if lignes:
             st.dataframe(pd.DataFrame(lignes), width='stretch', hide_index=True)
         else:
-            st.info("—")
+            st.info("-")
     except Exception:
-        st.info("—")
+        st.info("-")
 
 afficher_pied_de_page()

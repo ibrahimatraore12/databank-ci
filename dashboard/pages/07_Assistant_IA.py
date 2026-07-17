@@ -28,13 +28,13 @@ def repondre_a_la_question(question: str) -> str:
     try:
         if question == t("question_top_risque"):
             resultat = appeler_outil("outil_clients_a_risque", limit=10)
-            lignes = [f"- {c['full_name']} ({c['customer_id']}) — {c['segment']} — score {c['risque_composite']}/100"
+            lignes = [f"- {c['full_name']} ({c['customer_id']}) - {c['segment']} - score {c['risque_composite']}/100"
                       for c in resultat]
             return "\n".join(lignes) if lignes else t("aucun_client_trouve")
 
         if question == t("question_cross_sell"):
             resultat = appeler_outil("outil_candidats_cross_sell", limit=10)
-            lignes = [f"- {c['full_name']} ({c['customer_id']}) — {c['segment']} — {c['city']}" for c in resultat]
+            lignes = [f"- {c['full_name']} ({c['customer_id']}) - {c['segment']} - {c['city']}" for c in resultat]
             return "\n".join(lignes) if lignes else t("aucun_client_trouve")
 
         if question == t("question_kpis"):

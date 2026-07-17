@@ -66,10 +66,10 @@ MOIS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet",
            "août", "septembre", "octobre", "novembre", "décembre"]
 
 # CSS unique de la charte visuelle Artefact (noir #0D0D0D + orange #FF4500),
-# injecté une seule fois depuis APP.py — s'applique à toutes les pages car
+# injecté une seule fois depuis APP.py - s'applique à toutes les pages car
 # Streamlit partage le même DOM de session entre les pages du routeur
 # Single Artefact visual identity stylesheet (black #0D0D0D + orange #FF4500),
-# injected once from APP.py — applies to every page since Streamlit shares the
+# injected once from APP.py - applies to every page since Streamlit shares the
 # same session DOM across the router's pages
 CSS_ARTEFACT = """
 <style>
@@ -202,10 +202,10 @@ def label_technique(nom_technique: str) -> str:
 
 
 def format_fcfa(valeur) -> str:
-    # "3 320 273 FCFA" — espace comme séparateur de milliers
-    # "3 320 273 FCFA" — space as thousands separator
+    # "3 320 273 FCFA" - espace comme séparateur de milliers
+    # "3 320 273 FCFA" - space as thousands separator
     if pd.isna(valeur):
-        return "—"
+        return "-"
     entier = int(round(float(valeur)))
     formate = f"{entier:,}".replace(",", " ")
     return f"{formate} {config.CURRENCY_LABEL}"
@@ -215,7 +215,7 @@ def format_fcfa_compact(valeur) -> str:
     # "4,2 M FCFA" au-delà d'1 million, sinon identique à format_fcfa
     # "4.2 M FCFA" above 1 million, otherwise same as format_fcfa
     if pd.isna(valeur):
-        return "—"
+        return "-"
     valeur = float(valeur)
     if abs(valeur) >= 1_000_000:
         return f"{valeur / 1_000_000:.1f}".replace(".", ",") + f" M {config.CURRENCY_LABEL}"
@@ -223,10 +223,10 @@ def format_fcfa_compact(valeur) -> str:
 
 
 def format_pct(valeur) -> str:
-    # "22,9 %" — virgule décimale et espace avant le symbole
-    # "22.9 %" — decimal comma and space before the symbol
+    # "22,9 %" - virgule décimale et espace avant le symbole
+    # "22.9 %" - decimal comma and space before the symbol
     if pd.isna(valeur):
-        return "—"
+        return "-"
     return f"{float(valeur):.1f}".replace(".", ",") + " %"
 
 
@@ -234,7 +234,7 @@ def format_date_longue(valeur) -> str:
     # "8 juillet 2026 à 21h34" en français, format anglais équivalent sinon
     # "8 juillet 2026 à 21h34" in French, equivalent English format otherwise
     if pd.isna(valeur):
-        return "—"
+        return "-"
     dt = pd.Timestamp(valeur)
     if st.session_state.get("langue", "fr") == "fr":
         return f"{dt.day} {MOIS_FR[dt.month - 1]} {dt.year} à {dt.hour:02d}h{dt.minute:02d}"
@@ -248,9 +248,9 @@ def format_run_id(run_id) -> str:
 
 
 def couleur_score(score: float) -> str:
-    # Palette RAG : rouge (>=70, critique), ambre (>=40, attention), vert (positif) —
+    # Palette RAG : rouge (>=70, critique), ambre (>=40, attention), vert (positif) -
     # seuils alignés sur la règle métier (voir docs/decisions.md)
-    # RAG palette: red (>=70, critical), amber (>=40, attention), green (positive) —
+    # RAG palette: red (>=70, critical), amber (>=40, attention), green (positive) -
     # thresholds aligned with the business rule (see docs/decisions.md)
     if score >= 70:
         return "#E74C3C"
@@ -303,8 +303,8 @@ def afficher_barre_score(score: float, label: str = "") -> None:
 
 
 def afficher_entete(titre: str, sous_titre: str = "", emoji: str = "") -> None:
-    # Bandeau de page : fond noir dégradé, liseré orange, emoji optionnel — charte Artefact
-    # Page banner: black gradient, orange left border, optional emoji — Artefact identity
+    # Bandeau de page : fond noir dégradé, liseré orange, emoji optionnel - charte Artefact
+    # Page banner: black gradient, orange left border, optional emoji - Artefact identity
     prefixe = f"{emoji} " if emoji else ""
     st.markdown(
         f'<div class="page-banner"><h1>{prefixe}{titre}</h1><p>{sous_titre}</p></div>',
@@ -313,9 +313,9 @@ def afficher_entete(titre: str, sous_titre: str = "", emoji: str = "") -> None:
 
 
 def afficher_guide(texte: str) -> None:
-    # Boîte grise d'explication en haut de page, sous le bandeau — répond à
+    # Boîte grise d'explication en haut de page, sous le bandeau - répond à
     # "quelle question décisionnelle cette page résout-elle ?"
-    # Grey explanation box at the top of the page, under the banner — answers
+    # Grey explanation box at the top of the page, under the banner - answers
     # "what decision question does this page solve?"
     st.markdown(f'<div class="guide-box">{texte}</div>', unsafe_allow_html=True)
 
@@ -327,9 +327,9 @@ def afficher_entete_section(titre: str) -> None:
 
 
 def afficher_alerte(texte: str, type_alerte: str = "danger", icone: str = "🚨") -> None:
-    # Boîte d'alerte RAG — danger/critical pour les risques à traiter, success pour
+    # Boîte d'alerte RAG - danger/critical pour les risques à traiter, success pour
     # les signaux positifs (le dashboard doit aussi montrer ce qui va bien)
-    # RAG alert box — danger/critical for risks to act on, success for positive
+    # RAG alert box - danger/critical for risks to act on, success for positive
     # signals (the dashboard must also surface what's going well)
     st.markdown(f'<div class="alert-box {type_alerte}">{icone} {texte}</div>', unsafe_allow_html=True)
 
@@ -353,12 +353,12 @@ def afficher_etapes_pipeline(etat: dict) -> None:
     # Liste ✅/❌ des étapes du pipeline, dans le corps de la page (pas la sidebar)
     # ✅/❌ list of pipeline steps, in the page body (not the sidebar)
     if not etat:
-        st.info("—")
+        st.info("-")
         return
     for etape, statut in etat.get("steps", {}).items():
         icone = "✅" if statut == "OK" else "❌"
         st.markdown(f"{icone} {etape}")
-    st.caption(f"{t('derniere_execution')} : {etat.get('last_updated', '—')[:19]}")
+    st.caption(f"{t('derniere_execution')} : {etat.get('last_updated', '-')[:19]}")
 
 
 def afficher_pied_de_page(date_maj: str = "") -> None:
@@ -369,7 +369,7 @@ def afficher_pied_de_page(date_maj: str = "") -> None:
         f"""
         <div style="text-align:center;color:#6B6B6B;font-size:0.8rem;
                     margin-top:32px;padding-top:12px;border-top:2px solid #FF4500;">
-          {ligne_date}Ibrahima TRAORÉ — Analytics Engineer
+          {ligne_date}Ibrahima TRAORÉ - Analytics Engineer
         </div>
         """,
         unsafe_allow_html=True,
@@ -377,8 +377,8 @@ def afficher_pied_de_page(date_maj: str = "") -> None:
 
 
 def afficher_selecteur_langue() -> None:
-    # Bouton radio horizontal FR | EN — jamais de liste déroulante
-    # Horizontal FR | EN radio button — never a dropdown
+    # Bouton radio horizontal FR | EN - jamais de liste déroulante
+    # Horizontal FR | EN radio button - never a dropdown
     if "langue" not in st.session_state:
         st.session_state["langue"] = "fr"
 

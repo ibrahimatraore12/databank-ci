@@ -1,6 +1,6 @@
-# Engagement digital et comportement transactionnel des clients — répond à
+# Engagement digital et comportement transactionnel des clients - répond à
 # "qui s'engage et qui se désengage ?"
-# Digital engagement and transaction behavior of customers — answers "who is
+# Digital engagement and transaction behavior of customers - answers "who is
 # engaging and who is disengaging?"
 
 import os
@@ -125,13 +125,13 @@ with onglet_canaux:
             matrice.index[idx_min[0]], matrice.columns[idx_min[1]], matrice.values[idx_min],
         )
         # Le "paradoxe Premier" (fort revenu, faible adoption mobile) n'est affiché que
-        # s'il est réellement observé dans les données — jamais affirmé par défaut
+        # s'il est réellement observé dans les données - jamais affirmé par défaut
         # The "Premier paradox" (high income, low mobile adoption) is only shown if
-        # it actually holds in the data — never asserted by default
+        # it actually holds in the data - never asserted by default
         if segment_min == "Premier" and canal_min == t("canal_app_mobile"):
             st.info(t("paradoxe_premier_digital").format(pct=format_pct(valeur_min)))
         else:
-            st.info(f"**{segment_min} · {canal_min}** : {format_pct(valeur_min)} — {t('insight_canal_plus_faible')}")
+            st.info(f"**{segment_min} · {canal_min}** : {format_pct(valeur_min)} - {t('insight_canal_plus_faible')}")
     except Exception as error:
         st.warning(f"{t('erreur_donnees_titre')} ({error})")
 

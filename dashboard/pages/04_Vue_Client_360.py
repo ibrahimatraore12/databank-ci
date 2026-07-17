@@ -1,6 +1,6 @@
-# Fiche client complète — prépare l'entretien conseiller avant un appel :
+# Fiche client complète - prépare l'entretien conseiller avant un appel :
 # score de risque expliqué, produits détenus, comportement récent, recommandation
-# Full customer record — prepares the advisor's call: risk score explained,
+# Full customer record - prepares the advisor's call: risk score explained,
 # products held, recent behavior, recommendation
 
 import os
@@ -114,7 +114,7 @@ with col_identite:
           <div>
             <div style="font-size:20px;font-weight:700;color:#0D0D0D;">
               {client['full_name']} <span style="color:#6B6B6B;font-weight:400;font-size:14px;">
-              — {client['customer_id']}</span>
+              - {client['customer_id']}</span>
             </div>
             <div style="margin-top:4px;">{badge_segment(client['segment'])}
               <span style="margin-left:6px;color:{couleur_risque};font-weight:600;font-size:12px;">
@@ -192,7 +192,7 @@ with onglet_profil:
     with col_compte, st.container(border=True):
         texte = (
             f"{compte.iloc[0]['account_type']} · {format_fcfa(compte.iloc[0]['current_balance_xof'])}"
-            if not compte.empty else "—"
+            if not compte.empty else "-"
         )
         st.markdown(f"**🏦 {t('produit_compte')}**")
         st.write(texte)
@@ -253,7 +253,7 @@ with onglet_transactions:
         st.info(t("aucune_transaction"))
 
     if not dernieres.empty:
-        st.metric(t("canal_le_plus_utilise"), client["canal_majoritaire"] or "—")
+        st.metric(t("canal_le_plus_utilise"), client["canal_majoritaire"] or "-")
         dernieres_affichees = dernieres.rename(columns={
             "txn_datetime": t("col_date"), "txn_type": t("col_type"),
             "amount_xof": t("col_montant"), "channel_name": t("col_canal"),
@@ -289,7 +289,7 @@ with onglet_interactions:
         icones_sentiment = {"Positive": "🟢", "Neutral": "⚪", "Negative": "🔴"}
         for _, ligne in interactions.iterrows():
             icone = icones_sentiment.get(ligne["sentiment"], "⚪")
-            st.markdown(f"{icone} **{ligne['interaction_type']}** — {str(ligne['interaction_datetime'])[:10]}")
+            st.markdown(f"{icone} **{ligne['interaction_type']}** - {str(ligne['interaction_datetime'])[:10]}")
 
     st.write("")
     if reclamations_client.empty:
@@ -332,7 +332,7 @@ with onglet_ia:
             )
         afficher_barre_score(client["risque_composite"], t("score_total"))
     except Exception:
-        st.info("—")
+        st.info("-")
 
     st.write("")
     afficher_entete_section(t("prochaine_action_titre"))

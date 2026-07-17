@@ -1,6 +1,6 @@
-# Clients à risque de désengagement, priorisés pour l'action commerciale —
+# Clients à risque de désengagement, priorisés pour l'action commerciale -
 # répond à "qui vais-je perdre cette semaine et qui dois-je appeler en priorité ?"
-# Customers at risk of disengagement, prioritized for commercial action —
+# Customers at risk of disengagement, prioritized for commercial action -
 # answers "who am I going to lose this week, and who should I call first?"
 
 import os
@@ -82,11 +82,11 @@ st.plotly_chart(fig_hist, width='stretch')
 
 zone_saine = df[df["risque_composite"] < 40]
 st.caption(
-    f"🟢 {t('zone_clients_sains')} — {len(zone_saine)} clients · "
+    f"🟢 {t('zone_clients_sains')} - {len(zone_saine)} clients · "
     f"{format_fcfa_compact(zone_saine['solde_total_xof'].sum())}"
-    f"   ·   🟠 {t('zone_clients_surveiller')} — {len(zone_ambre)} clients · "
+    f"   ·   🟠 {t('zone_clients_surveiller')} - {len(zone_ambre)} clients · "
     f"{format_fcfa_compact(zone_ambre['solde_total_xof'].sum())}"
-    f"   ·   🔴 {t('zone_action_urgente')} — {len(zone_rouge)} clients · "
+    f"   ·   🔴 {t('zone_action_urgente')} - {len(zone_rouge)} clients · "
     f"{format_fcfa_compact(zone_rouge['solde_total_xof'].sum())}"
 )
 if len(zone_rouge) > 0:
@@ -104,10 +104,10 @@ onglet_rouge, onglet_ambre, onglet_reclamations = st.tabs([
 
 def afficher_liste_clients(sous_ensemble: pd.DataFrame, badge_type: str) -> None:
     # Une carte par client : badge segment, barre de score colorée, action
-    # recommandée en badge — l'idiome déjà établi dans ce dashboard pour tout
+    # recommandée en badge - l'idiome déjà établi dans ce dashboard pour tout
     # tableau nécessitant des pastilles HTML (st.dataframe ne les rend pas)
     # One card per customer: segment badge, colored score bar, recommended
-    # action as a badge — the idiom already established in this dashboard for
+    # action as a badge - the idiom already established in this dashboard for
     # any table needing HTML pills (st.dataframe can't render them)
     if sous_ensemble.empty:
         st.info(t("aucun_client_zone"))

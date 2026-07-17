@@ -1,6 +1,6 @@
-# Composition du portefeuille clients — répond à "mon portefeuille est-il en
+# Composition du portefeuille clients - répond à "mon portefeuille est-il en
 # bonne santé ?" avec des KPIs et graphiques actionnables
-# Customer portfolio composition — answers "is my portfolio healthy?" with
+# Customer portfolio composition - answers "is my portfolio healthy?" with
 # actionable KPIs and charts
 
 import os
@@ -85,9 +85,9 @@ fig_scatter = graphique_nuage_valeur_engagement(
 x_max = max(float(df["recency_jours"].max() or 0) * 1.05, 61)
 y_max = max(float(df["solde_M"].max() or 0) * 1.05, 6)
 
-# Zone verte (clients actifs) dessinée en premier, ambre par-dessus, rouge en dernier —
+# Zone verte (clients actifs) dessinée en premier, ambre par-dessus, rouge en dernier -
 # les zones se chevauchent volontairement (ex. x>60 satisfait aussi la zone ambre)
-# Green zone (active customers) drawn first, amber on top, red last — zones
+# Green zone (active customers) drawn first, amber on top, red last - zones
 # intentionally overlap (e.g. x>60 also satisfies the amber zone)
 fig_scatter.add_shape(
     type="rect", x0=0, x1=30, y0=0, y1=y_max,

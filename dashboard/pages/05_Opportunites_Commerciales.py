@@ -1,6 +1,6 @@
-# Opportunités commerciales — répond à "qui peut prendre quel produit cette
+# Opportunités commerciales - répond à "qui peut prendre quel produit cette
 # semaine, et combien ça vaut ?", à partir des taux d'acceptation historiques réels
-# Commercial opportunities — answers "who can take which product this week,
+# Commercial opportunities - answers "who can take which product this week,
 # and how much is it worth?", from real historical acceptance rates
 
 import os
@@ -44,10 +44,10 @@ taux_moyen_global = historique_offres["taux_acceptation"].mean()
 meilleure_offre = historique_offres.sort_values("taux_acceptation", ascending=False).iloc[0]
 
 # La probabilité d'acceptation d'un client ciblé est le taux historique réel de
-# l'offre la plus proche de son besoin (Card upgrade pour cross-sell carte) — pas
+# l'offre la plus proche de son besoin (Card upgrade pour cross-sell carte) - pas
 # un score prédictif par client, qu'aucun modèle de ce projet ne calcule
 # A targeted customer's acceptance probability is the real historical rate of the
-# closest matching offer (Card upgrade for card cross-sell) — not a per-customer
+# closest matching offer (Card upgrade for card cross-sell) - not a per-customer
 # predictive score, which no model in this project computes
 taux_card_upgrade = historique_offres.loc[historique_offres["offer_type"] == "Card upgrade", "taux_acceptation"]
 taux_card_upgrade = float(taux_card_upgrade.iloc[0]) if not taux_card_upgrade.empty else taux_moyen_global

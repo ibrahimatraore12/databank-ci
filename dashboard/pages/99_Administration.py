@@ -1,5 +1,5 @@
-# Zone réservée aux administrateurs — état technique du pipeline et des logs
-# Administrator-only area — technical pipeline and log status
+# Zone réservée aux administrateurs - état technique du pipeline et des logs
+# Administrator-only area - technical pipeline and log status
 
 import json
 import os
@@ -29,11 +29,11 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "databank-admin")
 
 # Colonnes que dbt_project/models/staging/*.sql lit réellement dans chaque feuille
 # (is_synthetic exclu : ajoutée automatiquement par pipelines/run_pipeline.py si
-# absente, jamais attendue dans un fichier uploadé) — sert à détecter un fichier
+# absente, jamais attendue dans un fichier uploadé) - sert à détecter un fichier
 # structurellement incompatible avec le pipeline avant de lancer quoi que ce soit
 # Columns dbt_project/models/staging/*.sql actually reads from each sheet
 # (is_synthetic excluded: added automatically by pipelines/run_pipeline.py when
-# missing, never expected in an uploaded file) — used to detect a file that's
+# missing, never expected in an uploaded file) - used to detect a file that's
 # structurally incompatible with the pipeline before running anything
 COLONNES_ATTENDUES_PAR_FEUILLE = {
     "Customers": [
@@ -114,13 +114,13 @@ def charger_json(chemin: str) -> dict:
 def valider_fichier_uploade(fichier) -> list:
     # Même contrôle que src/ingest.py::load_source_tables (feuille non vide,
     # taux de valeurs nulles), plus une vérification des colonnes attendues par
-    # dbt (COLONNES_ATTENDUES_PAR_FEUILLE) — sans quoi un fichier avec les bons
+    # dbt (COLONNES_ATTENDUES_PAR_FEUILLE) - sans quoi un fichier avec les bons
     # noms de feuilles mais des colonnes incompatibles ne serait détecté qu'après
     # ~55 secondes de recalcul, au milieu de dbt run. Ne lève jamais : on veut le
     # rapport complet des 10 feuilles, pas un arrêt à la première erreur
     # Same check as src/ingest.py::load_source_tables (non-empty sheet, null
     # rate), plus a check of the columns dbt actually expects
-    # (COLONNES_ATTENDUES_PAR_FEUILLE) — without it, a file with the right sheet
+    # (COLONNES_ATTENDUES_PAR_FEUILLE) - without it, a file with the right sheet
     # names but incompatible columns would only be caught ~55 seconds into the
     # recompute, mid-way through dbt run. Never raises: we want the full 10-sheet
     # report, not a stop at the first error
@@ -179,18 +179,18 @@ def relancer_pipeline_complet(fichier) -> bool:
     # Les fichiers touchés sont sauvegardés avant : si le pipeline échoue en
     # cours de route (fichier incompatible passé au travers de la validation,
     # panne dbt...), ils sont restaurés pour que cette instance ne reste pas
-    # dans un état partiel — l'admin voit l'erreur, rien d'autre ne change.
+    # dans un état partiel - l'admin voit l'erreur, rien d'autre ne change.
     # Persiste ensuite le résultat sur GCS pour que ça survive au redémarrage de
-    # cette instance et soit repris par les autres — un échec de cette dernière
+    # cette instance et soit repris par les autres - un échec de cette dernière
     # étape est logué mais ne fait pas échouer le recalcul (déjà réel localement)
     # Writes the uploaded file over the source file, then replays the whole
     # pipeline in the current process: ingestion+enrichment (Python), dbt run
     # (subprocess, same command as the Dockerfile), then ML. The affected files
     # are backed up beforehand: if the pipeline fails partway (an incompatible
     # file slipping past validation, a dbt failure...), they're restored so
-    # this instance doesn't stay in a partial state — the admin sees the
+    # this instance doesn't stay in a partial state - the admin sees the
     # error, nothing else changes. Then persists the result to GCS so it
-    # survives this instance's restart and is picked up by the others — a
+    # survives this instance's restart and is picked up by the others - a
     # failure of this last step is logged but doesn't fail the recompute
     # (already real locally)
     from pipelines.run_ml_pipeline import run_ml_pipeline
@@ -226,14 +226,14 @@ def relancer_pipeline_complet(fichier) -> bool:
         return False
 
     # Best-effort : l'Assistant IA (serveur MCP, processus séparé) ne relit GCS
-    # qu'à son propre démarrage — on lui demande de le faire tout de suite plutôt
+    # qu'à son propre démarrage - on lui demande de le faire tout de suite plutôt
     # que d'attendre son prochain redémarrage naturel
     # Best-effort: the AI Assistant (MCP server, separate process) only re-reads
-    # GCS at its own startup — ask it to do so right away instead of waiting for
+    # GCS at its own startup - ask it to do so right away instead of waiting for
     # its next natural restart
     from components.mcp_client import resynchroniser_mcp
     if not resynchroniser_mcp():
-        log_event("pipeline", "ERROR", "[MCP][RESYNC] Échec — Assistant IA périmé jusqu'à son redémarrage", {})
+        log_event("pipeline", "ERROR", "[MCP][RESYNC] Échec - Assistant IA périmé jusqu'à son redémarrage", {})
 
     return True
 
@@ -242,11 +242,11 @@ def afficher_derniere_lignes_log(chemin: str, n: int = 20) -> None:
     # Affiche les dernières lignes d'un fichier de log
     # Displays the last lines of a log file
     if not os.path.exists(chemin):
-        st.caption("—")
+        st.caption("-")
         return
     with open(chemin, "r") as f:
         lignes = f.readlines()
-    st.code("".join(lignes[-n:]) or "—", language="text")
+    st.code("".join(lignes[-n:]) or "-", language="text")
 
 
 if not verifier_mot_de_passe():
@@ -260,14 +260,14 @@ lineage = charger_json(config.LINEAGE_PATH)
 
 afficher_entete_section(t("etat_pipeline"))
 if etat_pipeline:
-    run_id = etat_pipeline.get("last_updated", "—")
+    run_id = etat_pipeline.get("last_updated", "-")
     st.caption(f"run_id : {format_run_id(run_id)}")
     afficher_etapes_pipeline(etat_pipeline)
 else:
-    st.info("—")
+    st.info("-")
 
 afficher_entete_section(t("titre_lineage"))
-st.json(lineage) if lineage else st.info("—")
+st.json(lineage) if lineage else st.info("-")
 
 afficher_entete_section(t("titre_logs"))
 onglet_pipeline, onglet_ml, onglet_api, onglet_errors = st.tabs(["pipeline.log", "ml.log", "api.log", "errors.log"])
@@ -286,7 +286,7 @@ try:
     with open(chemin_rapport, "r", encoding="utf-8") as f:
         st.markdown(f.read())
 except Exception:
-    st.info("—")
+    st.info("-")
 
 afficher_entete_section(t("titre_upload"))
 st.caption(t("upload_intro"))

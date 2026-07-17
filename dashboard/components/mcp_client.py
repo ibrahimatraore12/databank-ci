@@ -1,7 +1,7 @@
-# Client MCP du dashboard — appelle le serveur MCP déployé en HTTP
+# Client MCP du dashboard - appelle le serveur MCP déployé en HTTP
 # (transport streamable-http) au lieu d'importer les outils en mémoire,
 # pour que les réponses passent réellement par le protocole MCP.
-# Dashboard's MCP client — calls the deployed MCP server over HTTP
+# Dashboard's MCP client - calls the deployed MCP server over HTTP
 # (streamable-http transport) instead of importing the tools in-process,
 # so answers actually go through the MCP protocol.
 

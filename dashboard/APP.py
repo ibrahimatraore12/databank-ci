@@ -1,7 +1,7 @@
-# Point d'entrée Streamlit — routeur de navigation (les onglets se retraduisent
+# Point d'entrée Streamlit - routeur de navigation (les onglets se retraduisent
 # dynamiquement au changement de langue, ce qu'une navigation multipage par
 # fichiers ne permet pas nativement)
-# Streamlit entry point — navigation router (tabs re-translate dynamically on
+# Streamlit entry point - navigation router (tabs re-translate dynamically on
 # language change, which a file-based multipage navigation can't do natively)
 
 import json
@@ -41,7 +41,7 @@ def _statut_pipeline_sidebar() -> str:
     tout_ok = all(statut == "OK" for statut in etat.get("steps", {}).values())
     icone = "✅" if tout_ok else "❌"
     libelle = t("statut_pipeline_ok") if tout_ok else t("statut_pipeline_echec")
-    return f"{icone} {libelle} · {etat.get('last_updated', '—')[:10]}"
+    return f"{icone} {libelle} · {etat.get('last_updated', '-')[:10]}"
 
 
 _synchroniser_donnees_au_demarrage()
