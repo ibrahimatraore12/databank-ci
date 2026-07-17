@@ -1,4 +1,4 @@
-# Définition du problème ML - dataBank CI Customer 360
+# Définition du problème de Machine Learning - dataBank CI Customer 360
 
 > *[English version: [ml_problem_definition_en.md](ml_problem_definition_en.md)]*
 
@@ -6,108 +6,130 @@
 **Date :** 2026-07-14
 **Statut :** Cadrage initial, avant tout développement
 
-## 1. Question business
+## 1. La question métier
 
-> Comment identifier, parmi les clients actifs de la banque, ceux qui montrent
-> des signaux précoces de désengagement - afin de prioriser les actions des
-> conseillers commerciaux avant qu'un départ (fermeture de compte, inactivité
-> totale) ne survienne ?
+> Parmi les clients actifs de la banque, comment repérer ceux qui montrent
+> des premiers signes de désengagement, pour que les conseillers puissent
+> agir avant qu'un vrai départ n'arrive (fermeture de compte, inactivité
+> totale) ?
 
-Ce score n'est pas destiné à remplacer le jugement du conseiller : il sert à
-trier un portefeuille de 140 clients pour que les conseillers concentrent leur
-temps sur les comptes qui en ont le plus besoin.
+Ce score n'a pas pour but de remplacer le jugement du conseiller. Il sert à
+trier un portefeuille de 140 clients, pour que les conseillers concentrent
+leur temps sur les comptes qui en ont le plus besoin.
 
-## 2. Type de problème
+## 2. Quel type de problème est-ce vraiment ?
 
-**Ce n'est pas un problème de classification supervisée classique.**
+**Ce n'est pas un problème de classification classique**, où l'on
+connaîtrait déjà, pour chaque client, s'il est parti ou non.
 
-Le dataset source (`starter_dataset.xlsx`) ne contient aucune colonne
-`churn_flag` observée dans le réel : il n'existe pas d'historique de départs
-clients confirmés. Ce que nous appelons "churn" dans ce projet est en réalité
-un **label proxy construit à partir d'heuristiques métier documentées**
-(recency des transactions, réclamations non résolues, tendance d'activité,
-usage digital).
+Le fichier source (`starter_dataset.xlsx`) ne contient aucune colonne
+`churn_flag` (indicateur de départ) observée dans la réalité : il n'existe
+pas d'historique de départs de clients confirmés. Ce que l'on appelle
+"churn" (départ ou désengagement du client) dans ce projet est en fait un
+**indicateur approché ("label proxy"), construit à partir de règles métier
+documentées** : depuis quand le client n'a pas transigé, s'il a des
+réclamations non résolues, comment évolue son activité, et son usage des
+outils numériques.
 
-Nous traitons donc ce projet comme :
+Ce projet est donc traité en deux temps :
 
-- un **scoring comportemental** basé sur des règles métier explicites (Phase 1,
-  `ml/rules.py`), toujours disponible et interprétable sans modèle ;
-- une **expérimentation ML supervisée sur label proxy** (Phase 2), utile pour
-  comparer des approches et documenter la méthodologie, mais dont les
-  métriques ne doivent pas être présentées comme une prédiction de churn réel.
+- un **score comportemental basé sur des règles métier explicites**
+  (Étape 1, `ml/rules.py`), toujours disponible et facile à comprendre,
+  même sans modèle entraîné ;
+- une **expérimentation de Machine Learning supervisé sur cet indicateur
+  approché** (Étape 2), utile pour comparer différentes méthodes et
+  documenter la démarche, mais dont les résultats chiffrés ne doivent pas
+  être présentés comme une vraie prédiction de départ client.
 
-## 3. Hypothèses métier (H1 à H4)
+## 3. Les hypothèses métier (H1 à H4)
 
-| # | Hypothèse | Signal utilisé | Poids dans le score de règles |
+| # | Hypothèse | Donnée utilisée | Poids dans le score de règles |
 |---|-----------|-----------------|-------------------------------|
-| H1 | Un client qui n'a pas transigé depuis longtemps est en train de se désengager | `recency_jours` (dernière transaction) | 40 % |
+| H1 | Un client qui n'a pas transigé depuis longtemps est en train de se désengager | `recency_jours` (jours depuis la dernière transaction) | 40 % |
 | H2 | Un client avec des réclamations ouvertes ou mal résolues perd confiance | `nb_reclamations_ouvertes`, `sentiment`, `resolved_flag` | 30 % |
-| H3 | Une baisse de fréquence/volume de transactions sur la période récente précède un départ | tendance transactions (30 derniers jours vs période antérieure) | 10 % |
-| H4 | Un client peu engagé sur les canaux digitaux est plus exposé au risque de départ (moins de points de contact) | `mobile_app_active`, `internet_banking_active`, `mobile_money_linked` | 20 % |
+| H3 | Une baisse récente de la fréquence ou du montant des transactions annonce souvent un départ | tendance des transactions (30 derniers jours comparés à la période précédente) | 10 % |
+| H4 | Un client peu actif sur les outils numériques est plus exposé au risque de départ (moins de points de contact avec la banque) | `mobile_app_active`, `internet_banking_active`, `mobile_money_linked` | 20 % |
 
-Ces poids sont ceux du score de règles métier (Phase 1). Le score d'engagement
-digital utilisé ailleurs dans le projet (génération de features) a une
-pondération différente et documentée séparément dans `docs/decisions.md`.
+Ces poids sont ceux du score de règles métier (Étape 1). Un autre score,
+celui de l'engagement numérique utilisé ailleurs dans le projet (pour
+créer des indicateurs), utilise une pondération différente, documentée à
+part dans `docs/decisions.md`.
 
-## 4. Ce qui manque pour un vrai modèle de churn
+## 4. Ce qui manquerait pour un vrai modèle de départ client (churn)
 
-- **Historique de churn réel** : aucune date de clôture de compte ni de motif
-  de départ n'est disponible sur plus d'une période, donc impossible de
-  labelliser un vrai événement de churn.
-- **Net Banking Income (NBI) réel** : seule une estimation par formule UEMOA
-  standard est calculable (`estimated_nbi_flag=True`), pas le NBI comptable
-  réel du client.
-- **Bureau de crédit externe** : aucune donnée d'endettement global du client
-  hors banque (autres établissements) n'est disponible, ce qui limite la
-  fiabilité du score de risque crédit.
-- **Historique multi-période** : le dataset est une photo à un instant T, pas
-  une série temporelle longue - la notion de "tendance" reste donc approximative.
+- **Un historique réel des départs** : aucune date de clôture de compte ni
+  aucun motif de départ n'est disponible sur plus d'une période. Il est
+  donc impossible d'identifier un vrai départ de client dans les données.
+- **Le revenu réel généré par le client (NBI)** : seule une estimation par
+  formule standard UEMOA est calculable (`estimated_nbi_flag=True`), pas le
+  chiffre comptable réel du client.
+- **Un bureau de crédit externe** : aucune donnée sur l'endettement global
+  du client en dehors de la banque n'est disponible, ce qui limite la
+  fiabilité du score de risque de crédit.
+- **Un historique sur plusieurs périodes** : le fichier est une photo prise
+  à un instant donné, pas un suivi dans le temps. La notion de "tendance"
+  reste donc une approximation.
 
-## 5. Distribution du label et déséquilibre de classes
+## 5. Répartition des cas et déséquilibre entre les groupes
 
-Chiffres mesurés sur le portefeuille réel (140 clients), pas des estimations :
+Chiffres mesurés sur le portefeuille réel (140 clients), pas des
+estimations :
 
-- **Label naïf** (1 seul critère : recency > 90 jours) : **2 positifs, soit 1,4 %**.
-  Beaucoup trop peu pour entraîner quoi que ce soit - quasiment tout le bruit
-  d'échantillonnage.
-- **Label enrichi** (au moins 2 signaux sur 4 déclenchés parmi recency,
-  réclamation ouverte, tendance négative, digital faible) : **35 positifs,
-  soit 25,0 %**. Ce taux est en réalité plus élevé qu'anticipé au cadrage
-  initial du projet (une cible de 12-15 % avait été envisagée avant la mesure).
-  L'écart s'explique par le critère "tendance négative", qui à lui seul
-  concerne une large part du portefeuille sur la fenêtre de données observée
-  - voir la Section 11 du notebook EDA pour le détail par critère.
-- À titre de comparaison, un seuil à 3 critères sur 4 ne conserve qu'1 seul
-  positif (0,7 %) : ce seuil est trop strict pour être exploitable. Le seuil à
-  2 critères a donc été retenu comme compromis, documenté ici plutôt qu'ajusté
-  a posteriori pour coller à un chiffre cible.
+- **Avec un seul critère** (pas de transaction depuis plus de 90 jours) :
+  **2 clients concernés sur 140, soit 1,4 %**. C'est beaucoup trop peu pour
+  entraîner un modèle fiable : à ce niveau, on ne mesure quasiment que du
+  bruit statistique.
+- **Avec un critère plus large** (au moins 2 signaux déclenchés parmi les 4 :
+  inactivité, réclamation ouverte, tendance négative, faible usage
+  numérique) : **35 clients concernés, soit 25,0 %**. Ce taux est en
+  réalité plus élevé que prévu au démarrage du projet (une fourchette de
+  12 à 15 % avait été envisagée avant la mesure réelle). L'écart s'explique
+  surtout par le critère "tendance négative", qui à lui seul concerne une
+  large part du portefeuille sur la période observée. Le détail par critère
+  est visible dans la section 11 du notebook d'analyse exploratoire (EDA).
+- À titre de comparaison, exiger 3 signaux sur 4 ne laisse plus qu'1 seul
+  client concerné (0,7 %) : ce seuil est trop strict pour être utile. Le
+  seuil à 2 signaux a donc été retenu comme le meilleur compromis, et ce
+  choix est documenté ici tel quel, plutôt qu'ajusté après coup pour
+  obtenir un chiffre qui semblerait plus flatteur.
 
-**Conséquences documentées honnêtement :**
+**Les conséquences de ce choix, dites honnêtement :**
 
-- Le taux de 25 % rend le jeu réel exploitable pour un split stratifié 80/20
-  (environ 7 positifs dans un jeu de test de 28 clients), mais l'échantillon
-  reste petit dans l'absolu (140 clients au total).
-- Les métriques (AUC, Recall, Precision, F1) calculées sur le jeu réel doivent
-  être lues comme indicatives, pas comme des garanties de généralisation.
-- `ml/model.py::evaluate_model` déclenche un avertissement explicite si
-  `n < 200` ou si le nombre de positifs est `< 20` - ce qui se déclenche
-  systématiquement sur un split du jeu réel (n=140).
-- Un jeu de données synthétique enrichi (`data/enriched/`, `is_synthetic=True`)
-  est généré par bootstrap métier pour porter le volume à ~540 clients,
-  permettant une comparaison de modèles avec un échantillon de test plus
-  confortable (voir `docs/model_comparison.md`, généré à l'étape ML).
-- Toute donnée synthétique reste clairement marquée comme telle dans les tables
-  Gold et dans le dashboard - elle ne remplace jamais la donnée réelle dans les
-  vues opérationnelles par défaut.
+- Le taux de 25 % permet de séparer les données réelles en un jeu
+  d'entraînement et un jeu de test (80 %/20 %) tout en gardant des
+  proportions équilibrées (environ 7 clients concernés dans un jeu de test
+  de 28 clients). Mais l'échantillon reste petit dans l'absolu (140 clients
+  au total).
+- Les indicateurs de performance calculés sur les données réelles (AUC,
+  Recall, Precision, F1 - des mesures classiques pour évaluer un modèle de
+  prédiction) doivent être lus comme indicatifs seulement, pas comme une
+  garantie que le modèle fonctionnerait aussi bien sur d'autres clients.
+- La fonction `ml/model.py::evaluate_model` affiche automatiquement un
+  avertissement si le nombre total de clients est inférieur à 200, ou si
+  le nombre de clients concernés est inférieur à 20. Cet avertissement
+  s'affiche systématiquement sur les données réelles (140 clients).
+- Un jeu de données synthétique enrichi (`data/enriched/`,
+  `is_synthetic=True`) est généré à partir de règles métier et de
+  répétitions statistiques (méthode dite "bootstrap"), pour porter le
+  volume total à environ 540 clients. Cela permet de comparer les modèles
+  sur un échantillon de test plus confortable (voir
+  `docs/model_comparison.md`, généré automatiquement à l'étape de Machine
+  Learning).
+- Toute donnée synthétique reste toujours clairement identifiée comme
+  telle dans les tables finales (Gold) et dans le tableau de bord. Elle ne
+  remplace jamais la donnée réelle dans les vues affichées par défaut.
 
-## 6. Limites du projet, énoncées sans détour
+## 6. Les limites du projet, dites sans détour
 
-- Ce score est un outil d'aide à la priorisation, pas une prédiction validée
-  statistiquement sur un historique réel.
-- Le dataset réel est petit (140 clients, 34 prêts, 42 réclamations) : toute
-  conclusion doit être pondérée par cette taille d'échantillon.
-- Les données synthétiques respectent les distributions observées en EDA mais
-  ne peuvent pas inventer de corrélations que le monde réel ne confirme pas.
-- Ce projet est un exercice d'ingénierie analytique de bout en bout
-  (ingestion → dbt → ML → dashboard → MCP), pas un livrable de scoring crédit
-  réglementaire.
+- Ce score est un outil d'aide à la priorisation, pas une prédiction
+  validée statistiquement sur un historique réel de départs.
+- Le jeu de données réel est petit (140 clients, 34 prêts, 42
+  réclamations) : toute conclusion tirée de ce projet doit tenir compte de
+  cette petite taille d'échantillon.
+- Les données synthétiques respectent les tendances observées lors de
+  l'analyse exploratoire, mais elles ne peuvent pas inventer des liens
+  entre variables que le monde réel ne confirme pas.
+- Ce projet est un exercice d'ingénierie de données de bout en bout
+  (récupération des données → dbt → Machine Learning → tableau de bord →
+  serveur MCP), pas un outil de scoring de crédit réglementaire prêt pour
+  la production.
