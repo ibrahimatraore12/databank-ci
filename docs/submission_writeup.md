@@ -1,8 +1,8 @@
-# Note de soumission — dataBank CI Customer 360
+# Note de soumission - dataBank CI Customer 360
 
 > *[English version: [submission_writeup_en.md](submission_writeup_en.md)]*
 
-**Auteur :** Ibrahima TRAORÉ — Analytics Engineer
+**Auteur :** Ibrahima TRAORÉ - Analytics Engineer
 **Date :** Juillet 2026
 **Dashboard en production :** https://databank-ci-264685034714.europe-west9.run.app
 
@@ -16,21 +16,21 @@ comparant plusieurs approches de scoring.
 
 De bout en bout, rejouer tout le pipeline (ingestion + enrichissement +
 génération synthétique, transformation dbt, entraînement ML) prend moins de
-60 secondes sur ma machine de développement — un temps mesuré, pas estimé,
+60 secondes sur ma machine de développement - un temps mesuré, pas estimé,
 qui exclut le démarrage du dashboard lui-même.
 
 ## 2. Les décisions qui comptent
 
 **J'ai retenu l'architecture médaillon** (Bronze/Silver/Gold sur DuckDB,
 orchestrée par dbt) pour son idempotence et sa compatibilité native avec dbt
-— voir `docs/architecture.md` pour le détail et les alternatives écartées
+- voir `docs/architecture.md` pour le détail et les alternatives écartées
 (star schema, Data Vault).
 
 **J'ai traité le score de désengagement en deux phases**, pas comme un seul
 modèle ML présenté comme vérité terrain : un scoring de règles métier
 explicite (`ml/rules.py`, toujours disponible sans modèle entraîné) et une
 expérimentation ML supervisée sur un label proxy (`ml/comparison.py`). Le
-dataset source ne contient aucun départ client confirmé — voir
+dataset source ne contient aucun départ client confirmé - voir
 `docs/ml_problem_definition.md` pour la définition complète du problème et
 ses limites.
 
@@ -48,7 +48,7 @@ le score parfait comme une réussite.
 **J'ai généré 400 clients synthétiques** pour porter le volume de test de
 140 à 540 clients, avec traçabilité stricte (`is_synthetic=True` visible du
 Bronze au dashboard) et validation statistique par test de
-Kolmogorov-Smirnov sur la distribution du revenu — voir
+Kolmogorov-Smirnov sur la distribution du revenu - voir
 `docs/synthetic_data_rationale.md`.
 
 **J'ai imposé une couche sémantique stricte** : aucun nom de colonne
@@ -81,7 +81,7 @@ comme un seul outil cohérent. J'ai gardé la palette de couleurs de segment
 déjà validée plutôt que les couleurs initialement proposées pour la charte,
 après avoir constaté que deux d'entre elles étaient trop proches pour un
 daltonien. Chaque page d'alerte montre aussi un signal positif réel
-(portefeuille sain, opportunités identifiées), pas seulement des risques —
+(portefeuille sain, opportunités identifiées), pas seulement des risques -
 voir `docs/decisions.md` pour le détail de ces choix.
 
 ## 3. Une conclusion d'analyse, pas une suggestion générique
@@ -90,7 +90,7 @@ Sur le portefeuille réel (hors clients synthétiques, pour ne pas présenter
 un doublon comme deux clients distincts), 2 clients du segment Premier
 affichent un niveau de risque crédit élevé (`risk_band = High`) : Murielle
 Aka (score de risque 26,4/100, solde 6,44 M FCFA) et Bintou Soro (score
-19,0/100, solde 5,52 M FCFA) — solde combiné 11,97 M FCFA. Ce sont les 2
+19,0/100, solde 5,52 M FCFA) - solde combiné 11,97 M FCFA. Ce sont les 2
 seuls clients Premier dans ce cas sur les 49 clients réels du segment. Un
 appel conseiller sous 48h sur ces 2 comptes est la priorité commerciale
 immédiate identifiée par le dashboard (page Rétention et Risque), pas une
@@ -101,10 +101,10 @@ recommandation générique de "contacter les clients à risque".
 - Le dataset réel est petit (140 clients, 34 prêts, 42 réclamations) : voir
   `docs/ml_problem_definition.md` section 6 pour le détail.
 - Le NBI est une estimation par formule standard, pas le NBI comptable réel
-  du client — `docs/decisions.md`.
+  du client - `docs/decisions.md`.
 - Les scores quasi parfaits de RandomForest/XGBoost sur le jeu enrichi ne
   sont pas une garantie de performance en production sur des clients
-  inédits — `docs/model_comparison.md`.
+  inédits - `docs/model_comparison.md`.
 - Ce projet reste un outil d'aide à la décision : aucune action n'est
   déclenchée automatiquement à partir d'un score, l'humain reste dans la
   boucle.

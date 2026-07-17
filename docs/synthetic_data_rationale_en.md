@@ -1,8 +1,8 @@
-# Synthetic Data Rationale — dataBank CI Customer 360
+# Synthetic Data Rationale - dataBank CI Customer 360
 
 > *[French version: [synthetic_data_rationale.md](synthetic_data_rationale.md)]*
 
-**Author:** Ibrahima TRAORÉ — Analytics Engineer
+**Author:** Ibrahima TRAORÉ - Analytics Engineer
 **Date:** July 2026
 
 ## 1. Why generate synthetic data
@@ -27,7 +27,7 @@ draw random values out of thin air. The method:
    (`_tirer_clients_source`, `rng.choice` with `seed=42`).
 2. **Copying and remapping** the customer and all of their linked tables
    (accounts, cards, loans, transactions, complaints, interactions, offers)
-   under a new identifier `SYN-0001`, `SYN-0002`, etc. — relationships
+   under a new identifier `SYN-0001`, `SYN-0002`, etc. - relationships
    between tables (`account_id`, `customer_id`) stay consistent after
    remapping (`_remapper_comptes`, `_remapper_avec_compte`,
    `_remapper_table_client`).
@@ -49,7 +49,7 @@ Generating data that "looks like" real data isn't proof by itself.
 `_valider_distributions_ks()` compares the real and synthetic distribution of
 monthly income (`monthly_income_xof`) with a two-sample KS test
 (`scipy.stats.ks_2samp`): if the p-value falls below 0.05, an error log is
-emitted (`[SYNTHETIC][KS-TEST] distribution divergente`) — generation isn't
+emitted (`[SYNTHETIC][KS-TEST] distribution divergente`) - generation isn't
 automatically blocked on this failure, but the discrepancy is logged and
 inspectable in `logs/pipeline.log`, not hidden.
 
@@ -59,10 +59,10 @@ inspectable in `logs/pipeline.log`, not hidden.
   a synthetic customer remains, by construction, a copy of a real customer
   under a new identifier. Models trained on this enriched dataset can
   therefore memorize patterns specific to their source customer rather than
-  learn true generalization — see `docs/model_comparison_en.md` for the
+  learn true generalization - see `docs/model_comparison_en.md` for the
   concrete effect of this risk on the RandomForest/XGBoost scores.
 - **It never replaces real data** in the dashboard's default operational
-  views — the `is_synthetic` flag exists precisely to never confuse the two
+  views - the `is_synthetic` flag exists precisely to never confuse the two
   (see `docs/decisions_en.md`).
 - **The injected disengagement rate (10%) is a chosen parameter**, not a
   measurement: it aims to produce enough positive volume for training, not

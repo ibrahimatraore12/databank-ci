@@ -1,8 +1,8 @@
-# Architecture — dataBank CI Customer 360
+# Architecture - dataBank CI Customer 360
 
 > *[English version: [architecture_en.md](architecture_en.md)]*
 
-**Auteur :** Ibrahima TRAORÉ — Analytics Engineer
+**Auteur :** Ibrahima TRAORÉ - Analytics Engineer
 **Date :** Juillet 2026
 
 ## 1. Vue d'ensemble
@@ -44,7 +44,7 @@ projet, pas par défaut :
    `RANDOM_SEED=42` dans `config.py`).
 2. **Compatibilité native avec dbt.** dbt est pensé pour des couches en
    couches (staging/intermediate/marts) avec des tests déclaratifs à chaque
-   niveau (`_sources.yml`, `_intermediate.yml`, `_marts.yml`) — 93 tests au
+   niveau (`_sources.yml`, `_intermediate.yml`, `_marts.yml`) - 93 tests au
    total dans ce projet, tous verts.
 3. **Séparation claire réel/synthétique dès la couche Bronze.** Le
    générateur synthétique (`src/synthetic_data_generator.py`) produit des
@@ -56,13 +56,13 @@ projet, pas par défaut :
 
 **Alternatives écartées :**
 
-- **Star Schema (dimensions/faits) directement en Gold** — écarté parce que
+- **Star Schema (dimensions/faits) directement en Gold** - écarté parce que
   ce projet a besoin d'une couche staging intermédiaire pour appliquer les
   corrections métier (ex : `salary_domiciled_flag` recalculé à partir des
   transactions observées dans `stg_accounts.sql`) avant toute agrégation. Un
   star schema pur mélange typage, correction et agrégation dans les mêmes
   modèles.
-- **Data Vault** — écarté : sa complexité (hubs/liens/satellites) ne se
+- **Data Vault** - écarté : sa complexité (hubs/liens/satellites) ne se
   justifie pas sur un portefeuille de 140 clients réels et 10 tables source.
   C'est un surdimensionnement pour ce volume de données.
 
@@ -77,7 +77,7 @@ projet, pas par défaut :
 Le découpage "un fichier intermediate = un concern" (récence, tendance,
 réclamations, score digital, produits, solde, NBI, canal, prêts) permet
 d'ajouter une nouvelle colonne au mart `customer_360` sans toucher aux
-modèles existants — c'est ce qui a permis d'étendre le mart avec 8 nouvelles
+modèles existants - c'est ce qui a permis d'étendre le mart avec 8 nouvelles
 colonnes (solde total, NBI estimé, canal principal, ancienneté, etc.) sans
 casser un seul test existant.
 
@@ -86,26 +86,26 @@ casser un seul test existant.
 Le dataset source fait moins de 10 Mo (140 clients avant enrichissement,
 ~540 après). DuckDB s'exécute embarqué, sans serveur à opérer, se sérialise
 en un seul fichier (`dbt_project/databank_ci.duckdb`) qui tient dans l'image
-Docker, et parle SQL standard — donc directement compatible avec dbt sans
+Docker, et parle SQL standard - donc directement compatible avec dbt sans
 adaptation.
 
 **Chemin de migration si le volume dépasse ~10 Go** : changer uniquement
 `dbt_project/profiles.yml` pour pointer vers BigQuery (adapter `dbt-bigquery`
-déjà packagé pour ce cas), sans toucher un seul modèle SQL — c'est
+déjà packagé pour ce cas), sans toucher un seul modèle SQL - c'est
 précisément l'intérêt de passer par dbt plutôt que par du SQL directement
 embarqué dans le code Python.
 
 ## 5. Les trois consommateurs de la couche Gold
 
-- **Dashboard Streamlit** (`dashboard/`) — lit `customer_360` en lecture
+- **Dashboard Streamlit** (`dashboard/`) - lit `customer_360` en lecture
   seule (`duckdb.connect(..., read_only=True)`), applique une couche
   sémantique stricte (`components/ui.py::LABELS`) avant tout affichage.
-- **Serveur MCP** (`mcp_server/`) — 5 outils read-only exposés via le
+- **Serveur MCP** (`mcp_server/`) - 5 outils read-only exposés via le
   protocole Model Context Protocol, en `stdio` localement et en
   `streamable-http` (avec clé API) en production sur Cloud Run. Le dashboard
   et le serveur MCP partagent la même image Docker, seul le point d'entrée
   change (`--command`/`--args` au déploiement).
-- **Pipeline ML** (`ml/`) — score de règles métier toujours disponible sans
+- **Pipeline ML** (`ml/`) - score de règles métier toujours disponible sans
   modèle entraîné (`ml/rules.py`), plus une comparaison de modèles supervisés
   sur label proxy (`ml/comparison.py`), suivie dans MLflow
   (`mlflow.db`, runs réels enregistrés).
@@ -124,15 +124,15 @@ sans une couche de persistance externe.
 activé) plutôt que, par exemple, faire persister uniquement le fichier Excel
 source : synchroniser le fichier DuckDB déjà transformé évite de rejouer les
 ~60 secondes de pipeline (ingestion → dbt → ML) à chaque démarrage d'instance
-— seul un téléchargement de quelques secondes est nécessaire.
+- seul un téléchargement de quelques secondes est nécessaire.
 
 Le module `src/storage_sync.py` expose deux fonctions :
 
-- `telecharger_depuis_gcs()` — appelée une fois au démarrage de chaque
+- `telecharger_depuis_gcs()` - appelée une fois au démarrage de chaque
   instance (dashboard : `st.cache_resource` dans `dashboard/APP.py` ; serveur
   MCP : appel simple, processus long-vivant). Ne lève jamais : une erreur ne
   doit pas bloquer le démarrage de l'application.
-- `televerser_vers_gcs()` — appelée après un recalcul réussi depuis l'onglet
+- `televerser_vers_gcs()` - appelée après un recalcul réussi depuis l'onglet
   Administration (`dashboard/pages/99_Administration.py::relancer_pipeline_complet`),
   pour que le résultat survive au redémarrage de cette instance et soit repris
   par toutes les autres.
@@ -140,7 +140,7 @@ Le module `src/storage_sync.py` expose deux fonctions :
 **Garde-fou de compatibilité de schéma.** Sans contrôle, un futur changement
 de schéma dbt (nouvelle colonne dans un mart) pourrait voir son image se
 faire silencieusement écraser au démarrage par un ancien fichier restauré
-depuis GCS — pannes en cascade sur toute requête utilisant la nouvelle
+depuis GCS - pannes en cascade sur toute requête utilisant la nouvelle
 colonne. `config.DATA_SCHEMA_VERSION`, écrite dans `pipeline_state.json` à
 chaque exécution du pipeline, est comparée par `telecharger_depuis_gcs()`
 avant tout téléchargement : en cas de désaccord, elle ne touche à rien et
@@ -162,5 +162,5 @@ d'attendre son prochain redémarrage naturel.
 
 **Limite acceptée** : `max-instances=1` est fixé sur les deux services pour
 éviter qu'une instance déjà démarrée serve des données périmées pendant
-qu'une autre vient d'être rafraîchie — trafic interne/admin, faible volume,
+qu'une autre vient d'être rafraîchie - trafic interne/admin, faible volume,
 ce compromis est acceptable ici.

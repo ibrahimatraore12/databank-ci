@@ -1,8 +1,8 @@
-# Justification des données synthétiques — dataBank CI Customer 360
+# Justification des données synthétiques - dataBank CI Customer 360
 
 > *[English version: [synthetic_data_rationale_en.md](synthetic_data_rationale_en.md)]*
 
-**Auteur :** Ibrahima TRAORÉ — Analytics Engineer
+**Auteur :** Ibrahima TRAORÉ - Analytics Engineer
 **Date :** Juillet 2026
 
 ## 1. Pourquoi générer des données synthétiques
@@ -27,7 +27,7 @@ des valeurs aléatoires dans le vide. La méthode :
    (`_tirer_clients_source`, `rng.choice` avec `seed=42`).
 2. **Copie et remappage** du client et de toutes ses tables liées (comptes,
    cartes, prêts, transactions, réclamations, interactions, offres) sous un
-   nouvel identifiant `SYN-0001`, `SYN-0002`, etc. — les relations entre
+   nouvel identifiant `SYN-0001`, `SYN-0002`, etc. - les relations entre
    tables (`account_id`, `customer_id`) restent cohérentes après remappage
    (`_remapper_comptes`, `_remapper_avec_compte`, `_remapper_table_client`).
 3. **Injection contrôlée de désengagement** sur un sous-échantillon
@@ -50,7 +50,7 @@ Générer des données qui "ressemblent" au réel ne suffit pas à le prouver.
 `_valider_distributions_ks()` compare la distribution réelle et synthétique
 du revenu mensuel (`monthly_income_xof`) avec un test KS à deux échantillons
 (`scipy.stats.ks_2samp`) : si la p-value tombe sous 0,05, un log d'erreur est
-émis (`[SYNTHETIC][KS-TEST] distribution divergente`) — la génération n'est
+émis (`[SYNTHETIC][KS-TEST] distribution divergente`) - la génération n'est
 pas bloquée automatiquement sur cet échec, mais l'écart est tracé et
 consultable dans `logs/pipeline.log`, pas caché.
 
@@ -60,10 +60,10 @@ consultable dans `logs/pipeline.log`, pas caché.
   ne confirme pas : un client synthétique reste, par construction, une copie
   d'un client réel avec un nouvel identifiant. Les modèles entraînés sur ce
   jeu enrichi peuvent donc mémoriser des motifs propres à leur client source
-  plutôt qu'apprendre une vraie généralisation — voir `docs/model_comparison.md`
+  plutôt qu'apprendre une vraie généralisation - voir `docs/model_comparison.md`
   pour l'effet concret de ce risque sur les scores RandomForest/XGBoost.
 - **Elle ne remplace jamais la donnée réelle** dans les vues opérationnelles
-  par défaut du dashboard — le flag `is_synthetic` sert précisément à ne
+  par défaut du dashboard - le flag `is_synthetic` sert précisément à ne
   jamais confondre les deux (voir `docs/decisions.md`).
 - **Le taux de désengagement injecté (10 %) est un paramètre choisi**, pas
   une mesure : il vise à produire un volume de positifs suffisant pour

@@ -1,8 +1,8 @@
-# ERD Diagram — dataBank CI Customer 360
+# ERD Diagram - dataBank CI Customer 360
 
 > *[French version: [erd_diagram.md](erd_diagram.md)]*
 
-**Author:** Ibrahima TRAORÉ — Analytics Engineer
+**Author:** Ibrahima TRAORÉ - Analytics Engineer
 **Date:** July 2026
 
 This diagram covers the staging layer schema (`dbt_project/models/staging/`),
@@ -120,5 +120,5 @@ Every table at the "transaction/account/loan" grain is aggregated to the
 customer grain in `dbt_project/models/intermediate/` (one model per concern:
 recency, trend, complaints, digital score, products, balance, NBI, channel,
 loans), then joined into a single row per customer in
-`dbt_project/models/marts/customer_360.sql` — see `docs/data_dictionary.md`
+`dbt_project/models/marts/customer_360.sql` - see `docs/data_dictionary.md`
 for the column-by-column detail of this mart.

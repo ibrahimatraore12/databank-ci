@@ -1,15 +1,15 @@
-# ML Problem Definition — dataBank CI Customer 360
+# ML Problem Definition - dataBank CI Customer 360
 
 > *[Version française disponible : [ml_problem_definition.md](ml_problem_definition.md)]*
 
-**Author:** Ibrahima TRAORÉ — Analytics Engineer
+**Author:** Ibrahima TRAORÉ - Analytics Engineer
 **Date:** July 2026
 **Status:** Initial framing, before development
 
 ## 1. Business question
 
 > Among the bank's active customers, how do we identify those showing early
-> signals of disengagement — so that relationship managers can prioritize
+> signals of disengagement - so that relationship managers can prioritize
 > their actions before an actual departure (account closure, total
 > inactivity) occurs?
 
@@ -60,20 +60,20 @@ different weighting, documented separately in `docs/decisions_en.md`.
   outside the bank is available, which limits the reliability of the credit
   risk score.
 - **Multi-period history**: the dataset is a single point-in-time snapshot,
-  not a long time series — so the notion of "trend" stays approximate.
+  not a long time series - so the notion of "trend" stays approximate.
 
 ## 5. Label distribution and class imbalance
 
 Figures measured on the real portfolio (140 customers), not estimates:
 
 - **Naive label** (single criterion: recency > 90 days): **2 positives, or
-  1.4%**. Far too few to train anything on — essentially sampling noise.
+  1.4%**. Far too few to train anything on - essentially sampling noise.
 - **Enriched label** (at least 2 of 4 signals triggered among recency, open
   complaint, negative trend, low digital usage): **35 positives, or 25.0%**.
   This rate turned out higher than expected during initial project scoping
   (a target of 12-15% had been anticipated before measurement). The gap
   comes from the "negative trend" criterion, which alone covers a large
-  share of the portfolio over the observed data window — see Section 11 of
+  share of the portfolio over the observed data window - see Section 11 of
   the EDA notebook for the per-criterion breakdown.
 - For comparison, a 3-out-of-4 threshold keeps only 1 positive (0.7%): too
   strict to be usable. I retained the 2-criteria threshold as the most
@@ -88,14 +88,14 @@ Figures measured on the real portfolio (140 customers), not estimates:
 - Metrics (AUC, Recall, Precision, F1) computed on the real dataset should
   be read as indicative, not as guarantees of generalization.
 - `ml/model.py::evaluate_model` raises an explicit warning if `n < 200` or
-  if the number of positives is `< 20` — which triggers systematically on a
+  if the number of positives is `< 20` - which triggers systematically on a
   split of the real dataset (n=140).
 - An enriched synthetic dataset (`data/enriched/`, `is_synthetic=True`) is
   generated through business-rule bootstrapping to bring volume to ~540
   customers, enabling a model comparison with a more comfortable test
   sample (see `docs/model_comparison.md`, produced at the ML step).
 - Synthetic data always stays clearly flagged as such in the Gold tables and
-  in the dashboard — it never replaces real data in the default operational
+  in the dashboard - it never replaces real data in the default operational
   views.
 
 ## 6. Project limitations, stated plainly

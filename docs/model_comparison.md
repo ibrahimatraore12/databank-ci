@@ -1,8 +1,8 @@
-# Étude comparative de modèles — dataBank CI Customer 360
+# Étude comparative de modèles - dataBank CI Customer 360
 
 > *[English version: [model_comparison_en.md](model_comparison_en.md)]*
 
-**Généré automatiquement par `ml/comparison.py` — ne pas éditer à la main.**
+**Généré automatiquement par `ml/comparison.py` - ne pas éditer à la main.**
 
 - Scénario A : 140 clients réels, 35 positifs (25.0 %)
 - Scénario B : 540 clients réels + synthétiques, 151 positifs (28.0 %)
@@ -21,4 +21,4 @@
 
 Ces métriques restent indicatives : voir `docs/ml_problem_definition.md` pour les limites du label proxy utilisé et les avertissements sur la taille d'échantillon.
 
-**Sur les scores quasi parfaits du Scénario B (RandomForest, XGBoost) :** les clients synthétiques sont générés par bootstrap métier à partir des clients réels (voir `src/synthetic_data_generator.py`), donc statistiquement très proches de leur client source. Un modèle capacitaire (forêt, boosting) peut mémoriser ces motifs facilement — ces scores élevés reflètent la facilité du jeu synthétique, pas une garantie de performance en production sur des clients inédits.
+**Sur les scores quasi parfaits du Scénario B (RandomForest, XGBoost) :** les clients synthétiques sont générés par bootstrap métier à partir des clients réels (voir `src/synthetic_data_generator.py`), donc statistiquement très proches de leur client source. Un modèle capacitaire (forêt, boosting) peut mémoriser ces motifs facilement - ces scores élevés reflètent la facilité du jeu synthétique, pas une garantie de performance en production sur des clients inédits.

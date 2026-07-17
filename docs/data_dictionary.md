@@ -1,8 +1,8 @@
-# Dictionnaire de données — dataBank CI Customer 360
+# Dictionnaire de données - dataBank CI Customer 360
 
 > *[English version: [data_dictionary_en.md](data_dictionary_en.md)]*
 
-**Auteur :** Ibrahima TRAORÉ — Analytics Engineer
+**Auteur :** Ibrahima TRAORÉ - Analytics Engineer
 **Date :** Juillet 2026
 
 Ce dictionnaire couvre les 3 tables de la couche Gold
@@ -10,14 +10,14 @@ Ce dictionnaire couvre les 3 tables de la couche Gold
 serveur MCP et le pipeline ML. Pour le schéma des tables source, voir
 `docs/erd_diagram.md`.
 
-## 1. `customer_360` — une ligne par client
+## 1. `customer_360` - une ligne par client
 
 | Colonne | Type | Description |
 |---------|------|--------------|
 | `customer_id` | varchar (PK) | Identifiant unique du client |
 | `full_name` | varchar | Nom complet |
 | `segment` | varchar | `Mass` / `Affluent` / `Premier` / `Youth` |
-| `risk_band` | varchar | `Low` / `Medium` / `High` — niveau de risque crédit déclaré |
+| `risk_band` | varchar | `Low` / `Medium` / `High` - niveau de risque crédit déclaré |
 | `city`, `district` | varchar | Localisation |
 | `monthly_income_xof` | decimal | Revenu mensuel déclaré (FCFA) |
 | `preferred_channel` | varchar | Canal bancaire préféré déclaré par le client |
@@ -32,20 +32,20 @@ serveur MCP et le pipeline ML. Pour le schéma des tables source, voir
 | `nb_comptes`, `nb_cartes`, `nb_produits_total` | integer | Nombre de produits détenus |
 | `solde_total_xof` | decimal | Somme des soldes courants de tous les comptes du client |
 | `avg_balance_90d_xof` | decimal | Somme des soldes moyens 90 jours de tous les comptes |
-| `nbi_estime_xof` | decimal | NBI estimé (formule UEMOA standard, **pas** le NBI comptable réel — voir `docs/decisions.md`) |
+| `nbi_estime_xof` | decimal | NBI estimé (formule UEMOA standard, **pas** le NBI comptable réel - voir `docs/decisions.md`) |
 | `canal_majoritaire` | varchar | Canal le plus utilisé du client, par nombre de transactions |
 | `dpd_max` | integer | Retard de paiement maximum observé (jours), tous prêts confondus |
 | `anciennete_jours` | integer | Jours depuis `onboarding_date` |
-| `risque_composite` | decimal (0-100) | Score de risque de désengagement — somme pondérée de 4 sous-scores (recency 40 %, réclamations 30 %, digital 20 %, tendance 10 %) |
+| `risque_composite` | decimal (0-100) | Score de risque de désengagement - somme pondérée de 4 sous-scores (recency 40 %, réclamations 30 %, digital 20 %, tendance 10 %) |
 | `is_high_value_at_risk` | boolean | Segment Premier/Affluent ET recency > 60j |
 | `is_digitally_dormant_salary` | boolean | Salaire domicilié ET score digital ≤ 1 |
 | `is_complaints_churn_risk` | boolean | Réclamation ouverte ET recency > 60j |
 | `is_cross_sell_target` | boolean | Client sans carte |
 | `is_salary_upsell_opportunity` | boolean | Revenu élevé (≥ 500 000 FCFA) ET salaire non domicilié |
-| `is_synthetic` | boolean | `True` si ligne générée par bootstrap métier — jamais affiché à l'utilisateur final |
+| `is_synthetic` | boolean | `True` si ligne générée par bootstrap métier - jamais affiché à l'utilisateur final |
 | `updated_at` | timestamp | Horodatage de la dernière exécution `dbt run` |
 
-## 2. `customer_segments` — une ligne par segment
+## 2. `customer_segments` - une ligne par segment
 
 | Colonne | Type | Description |
 |---------|------|--------------|
@@ -57,7 +57,7 @@ serveur MCP et le pipeline ML. Pour le schéma des tables source, voir
 | `score_digital_moyen` | decimal | Score digital moyen du segment |
 | `updated_at` | timestamp | Horodatage de la dernière exécution |
 
-## 3. `nba` — une ligne par client (Next Best Action)
+## 3. `nba` - une ligne par client (Next Best Action)
 
 | Colonne | Type | Description |
 |---------|------|--------------|
@@ -67,7 +67,7 @@ serveur MCP et le pipeline ML. Pour le schéma des tables source, voir
 | `risque_composite` | decimal | Score de risque du client, dupliqué depuis `customer_360` pour éviter une jointure côté dashboard |
 | `updated_at` | timestamp | Horodatage de la dernière exécution |
 
-## 4. Couche sémantique — de la colonne technique au libellé affiché
+## 4. Couche sémantique - de la colonne technique au libellé affiché
 
 Aucune des colonnes ci-dessus n'apparaît telle quelle dans le dashboard :
 chaque nom technique est traduit par `dashboard/components/ui.py::LABELS`
@@ -84,4 +84,4 @@ décision qui impose cette règle.
 | `MCP_API_KEY` | aucun (auth désactivée si absente) | `mcp_server/databank_mcp_server.py`, `dashboard/components/mcp_client.py` | Clé partagée exigée en en-tête `X-API-Key` sur le transport HTTP du serveur MCP |
 | `MCP_TRANSPORT` | `stdio` | `mcp_server/databank_mcp_server.py` | `stdio` en local, `streamable-http` en production |
 | `PORT` | `8080` | `mcp_server/databank_mcp_server.py`, Dockerfile | Port d'écoute (injecté automatiquement par Cloud Run) |
-| `GCS_BUCKET_NAME` | aucun (persistance désactivée si absente) | `src/storage_sync.py` | Bucket GCS pour la persistance des données au-delà du cycle de vie d'une instance Cloud Run — voir `docs/architecture.md` section 6 |
+| `GCS_BUCKET_NAME` | aucun (persistance désactivée si absente) | `src/storage_sync.py` | Bucket GCS pour la persistance des données au-delà du cycle de vie d'une instance Cloud Run - voir `docs/architecture.md` section 6 |

@@ -1,8 +1,8 @@
-# Submission Writeup — dataBank CI Customer 360
+# Submission Writeup - dataBank CI Customer 360
 
 > *[French version: [submission_writeup.md](submission_writeup.md)]*
 
-**Author:** Ibrahima TRAORÉ — Analytics Engineer
+**Author:** Ibrahima TRAORÉ - Analytics Engineer
 **Date:** July 2026
 **Live dashboard:** https://databank-ci-264685034714.europe-west9.run.app
 
@@ -15,13 +15,13 @@ transformation and an ML pipeline comparing several scoring approaches.
 
 End to end, replaying the whole pipeline (ingestion + enrichment + synthetic
 generation, dbt transformation, ML training) takes under 60 seconds on my
-development machine — a measured time, not an estimate, excluding the
+development machine - a measured time, not an estimate, excluding the
 dashboard's own startup.
 
 ## 2. The decisions that matter
 
 **I chose the medallion architecture** (Bronze/Silver/Gold on DuckDB,
-orchestrated by dbt) for its idempotence and native fit with dbt — see
+orchestrated by dbt) for its idempotence and native fit with dbt - see
 `docs/architecture_en.md` for the detail and the alternatives ruled out
 (star schema, Data Vault).
 
@@ -29,7 +29,7 @@ orchestrated by dbt) for its idempotence and native fit with dbt — see
 model presented as ground truth: an explicit rule-based score (`ml/rules.py`,
 always available without a trained model) and a supervised ML experiment on
 a proxy label (`ml/comparison.py`). The source dataset contains no confirmed
-customer departure — see `docs/ml_problem_definition_en.md` for the full
+customer departure - see `docs/ml_problem_definition_en.md` for the full
 problem definition and its limitations.
 
 **I chose the production model on a robustness criterion, not the raw best
@@ -46,7 +46,7 @@ presenting the perfect score as a win.
 **I generated 400 synthetic customers** to bring the test volume from 140 to
 540 customers, with strict traceability (`is_synthetic=True` visible from
 Bronze to the dashboard) and statistical validation via a Kolmogorov-Smirnov
-test on the income distribution — see `docs/synthetic_data_rationale_en.md`.
+test on the income distribution - see `docs/synthetic_data_rationale_en.md`.
 
 **I enforced a strict semantic layer**: no technical column name
 (`risk_band`, `nb_reclamations_ouvertes`...) appears in the dashboard.
@@ -78,7 +78,7 @@ tool. I kept the already-validated segment color palette instead of the
 colors initially proposed for the charte, after finding two of them were
 too close for color-vision-deficient users. Every alert-bearing page also
 shows a real positive signal (healthy portfolio, identified opportunities),
-not just risks — see `docs/decisions_en.md` for the detail behind these
+not just risks - see `docs/decisions_en.md` for the detail behind these
 choices.
 
 ## 3. An analytical conclusion, not a generic suggestion
@@ -87,20 +87,20 @@ On the real portfolio (excluding synthetic customers, to avoid presenting a
 duplicate as two distinct customers), 2 Premier-segment customers show a
 high credit risk level (`risk_band = High`): Murielle Aka (risk score
 26.4/100, balance 6.44M FCFA) and Bintou Soro (score 19.0/100, balance 5.52M
-FCFA) — combined balance 11.97M FCFA. These are the only 2 Premier customers
+FCFA) - combined balance 11.97M FCFA. These are the only 2 Premier customers
 in this situation among the segment's 49 real customers. An advisor call
 within 48h on these 2 accounts is the immediate commercial priority
-identified by the dashboard (Retention and Risk page) — not a generic
+identified by the dashboard (Retention and Risk page) - not a generic
 recommendation to "contact at-risk customers."
 
 ## 4. Limitations, stated plainly
 
-- The real dataset is small (140 customers, 34 loans, 42 complaints) — see
+- The real dataset is small (140 customers, 34 loans, 42 complaints) - see
   `docs/ml_problem_definition_en.md` section 6 for detail.
 - NBI is a standard-formula estimate, not the customer's real accounting NBI
-  — `docs/decisions_en.md`.
+  - `docs/decisions_en.md`.
 - The near-perfect RandomForest/XGBoost scores on the enriched dataset are
-  not a guarantee of production performance on unseen customers —
+  not a guarantee of production performance on unseen customers -
   `docs/model_comparison_en.md`.
 - This project remains a decision-support tool: no action is triggered
   automatically from a score, the human stays in the loop.

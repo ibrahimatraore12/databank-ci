@@ -1,8 +1,8 @@
-# Compréhension métier — dataBank CI Customer 360
+# Compréhension métier - dataBank CI Customer 360
 
 > *[English version: [business_understanding_en.md](business_understanding_en.md)]*
 
-**Auteur :** Ibrahima TRAORÉ — Analytics Engineer
+**Auteur :** Ibrahima TRAORÉ - Analytics Engineer
 **Date :** 2026-07-14
 
 ## 1. Contexte
@@ -14,17 +14,17 @@ transactions, interactions et réclamations.
 
 ## 2. Cinq décisions métier que ce projet doit soutenir
 
-1. **Priorisation des visites conseillers** — quels clients contacter en
+1. **Priorisation des visites conseillers** - quels clients contacter en
    premier cette semaine parmi ceux qui montrent des signaux de
    désengagement ?
-2. **Ciblage cross-sell** — quels clients détenant peu de produits (ex : les
+2. **Ciblage cross-sell** - quels clients détenant peu de produits (ex : les
    42 clients sans carte) sont de bons candidats pour une offre ciblée ?
-3. **Traitement prioritaire des réclamations** — quelles réclamations
+3. **Traitement prioritaire des réclamations** - quelles réclamations
    ouvertes doivent être escaladées en priorité selon la sévérité et
    l'impact potentiel sur la rétention ?
-4. **Upsell salaire domicilié** — quels clients à fort revenu mensuel n'ont
+4. **Upsell salaire domicilié** - quels clients à fort revenu mensuel n'ont
    pas encore domicilié leur salaire chez dataBank CI ?
-5. **Surveillance du risque crédit** — quels emprunteurs approchent d'un
+5. **Surveillance du risque crédit** - quels emprunteurs approchent d'un
    dépassement de délai de paiement (seuil 15 jours) et nécessitent un suivi
    avant escalade en `Watchlist` ou `Delinquent` ?
 
@@ -53,7 +53,7 @@ proportion de clients avec salaire domicilié.
   n'est disponible séparément du flag `is_disputed`.
 - **Historique multi-année** : la fenêtre de données (2024-02 à 2025-12)
   est courte pour des analyses de tendance robustes.
-- **Intégration bureau de crédit externe** et **NBI comptable réel** — voir
+- **Intégration bureau de crédit externe** et **NBI comptable réel** - voir
   `docs/ml_problem_definition.md` section 4.
 - **Processus de validation humaine** avant toute action automatisée déclenchée
   par le score (ce projet reste un outil d'aide à la décision, pas un moteur

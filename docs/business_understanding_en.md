@@ -1,8 +1,8 @@
-# Business Understanding — dataBank CI Customer 360
+# Business Understanding - dataBank CI Customer 360
 
 > *[Version française disponible : [business_understanding.md](business_understanding.md)]*
 
-**Author:** Ibrahima TRAORÉ — Analytics Engineer
+**Author:** Ibrahima TRAORÉ - Analytics Engineer
 **Date:** July 2026
 
 ## 1. Context
@@ -14,15 +14,15 @@ interactions and complaints.
 
 ## 2. Five business decisions this project needs to support
 
-1. **Advisor visit prioritization** — which customers should be contacted
+1. **Advisor visit prioritization** - which customers should be contacted
    first this week among those showing disengagement signals?
-2. **Cross-sell targeting** — which customers holding few products (e.g. the
+2. **Cross-sell targeting** - which customers holding few products (e.g. the
    42 customers without a card) are good candidates for a targeted offer?
-3. **Complaint triage** — which open complaints should be escalated first
+3. **Complaint triage** - which open complaints should be escalated first
    based on severity and potential impact on retention?
-4. **Salary domiciliation upsell** — which high-income customers haven't yet
+4. **Salary domiciliation upsell** - which high-income customers haven't yet
    domiciled their salary with dataBank CI?
-5. **Credit risk monitoring** — which borrowers are approaching a payment
+5. **Credit risk monitoring** - which borrowers are approaching a payment
    delay threshold (15 days) and need follow-up before escalating to
    `Watchlist` or `Delinquent`?
 
@@ -49,7 +49,7 @@ customers with domiciled salary.
   separately from the `is_disputed` flag.
 - **Multi-year history**: the data window (2024-02 to 2025-12) is short for
   robust trend analysis.
-- **External credit bureau integration** and **real accounting NBI** — see
+- **External credit bureau integration** and **real accounting NBI** - see
   `docs/ml_problem_definition_en.md` section 4.
 - **Human validation step** before any automated action triggered by the
   score (this project remains a decision-support tool, not an autonomous

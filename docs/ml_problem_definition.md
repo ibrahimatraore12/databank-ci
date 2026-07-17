@@ -1,15 +1,15 @@
-# Définition du problème ML — dataBank CI Customer 360
+# Définition du problème ML - dataBank CI Customer 360
 
 > *[English version: [ml_problem_definition_en.md](ml_problem_definition_en.md)]*
 
-**Auteur :** Ibrahima TRAORÉ — Analytics Engineer
+**Auteur :** Ibrahima TRAORÉ - Analytics Engineer
 **Date :** 2026-07-14
 **Statut :** Cadrage initial, avant tout développement
 
 ## 1. Question business
 
 > Comment identifier, parmi les clients actifs de la banque, ceux qui montrent
-> des signaux précoces de désengagement — afin de prioriser les actions des
+> des signaux précoces de désengagement - afin de prioriser les actions des
 > conseillers commerciaux avant qu'un départ (fermeture de compte, inactivité
 > totale) ne survienne ?
 
@@ -61,14 +61,14 @@ pondération différente et documentée séparément dans `docs/decisions.md`.
   hors banque (autres établissements) n'est disponible, ce qui limite la
   fiabilité du score de risque crédit.
 - **Historique multi-période** : le dataset est une photo à un instant T, pas
-  une série temporelle longue — la notion de "tendance" reste donc approximative.
+  une série temporelle longue - la notion de "tendance" reste donc approximative.
 
 ## 5. Distribution du label et déséquilibre de classes
 
 Chiffres mesurés sur le portefeuille réel (140 clients), pas des estimations :
 
 - **Label naïf** (1 seul critère : recency > 90 jours) : **2 positifs, soit 1,4 %**.
-  Beaucoup trop peu pour entraîner quoi que ce soit — quasiment tout le bruit
+  Beaucoup trop peu pour entraîner quoi que ce soit - quasiment tout le bruit
   d'échantillonnage.
 - **Label enrichi** (au moins 2 signaux sur 4 déclenchés parmi recency,
   réclamation ouverte, tendance négative, digital faible) : **35 positifs,
@@ -76,7 +76,7 @@ Chiffres mesurés sur le portefeuille réel (140 clients), pas des estimations :
   initial du projet (une cible de 12-15 % avait été envisagée avant la mesure).
   L'écart s'explique par le critère "tendance négative", qui à lui seul
   concerne une large part du portefeuille sur la fenêtre de données observée
-  — voir la Section 11 du notebook EDA pour le détail par critère.
+  - voir la Section 11 du notebook EDA pour le détail par critère.
 - À titre de comparaison, un seuil à 3 critères sur 4 ne conserve qu'1 seul
   positif (0,7 %) : ce seuil est trop strict pour être exploitable. Le seuil à
   2 critères a donc été retenu comme compromis, documenté ici plutôt qu'ajusté
@@ -90,14 +90,14 @@ Chiffres mesurés sur le portefeuille réel (140 clients), pas des estimations :
 - Les métriques (AUC, Recall, Precision, F1) calculées sur le jeu réel doivent
   être lues comme indicatives, pas comme des garanties de généralisation.
 - `ml/model.py::evaluate_model` déclenche un avertissement explicite si
-  `n < 200` ou si le nombre de positifs est `< 20` — ce qui se déclenche
+  `n < 200` ou si le nombre de positifs est `< 20` - ce qui se déclenche
   systématiquement sur un split du jeu réel (n=140).
 - Un jeu de données synthétique enrichi (`data/enriched/`, `is_synthetic=True`)
   est généré par bootstrap métier pour porter le volume à ~540 clients,
   permettant une comparaison de modèles avec un échantillon de test plus
   confortable (voir `docs/model_comparison.md`, généré à l'étape ML).
 - Toute donnée synthétique reste clairement marquée comme telle dans les tables
-  Gold et dans le dashboard — elle ne remplace jamais la donnée réelle dans les
+  Gold et dans le dashboard - elle ne remplace jamais la donnée réelle dans les
   vues opérationnelles par défaut.
 
 ## 6. Limites du projet, énoncées sans détour
