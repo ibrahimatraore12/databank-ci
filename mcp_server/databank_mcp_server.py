@@ -1,14 +1,14 @@
-# Serveur MCP dataBank CI — expose 5 outils en lecture seule sur le portefeuille
-# dataBank CI MCP server — exposes 5 read-only tools over the portfolio
+# Serveur MCP dataBank CI - expose 5 outils en lecture seule sur le portefeuille
+# dataBank CI MCP server - exposes 5 read-only tools over the portfolio
 #
 # Toute connexion DuckDB ouverte par les outils est read_only=True (voir mcp_server/tools/*.py) :
 # aucune écriture n'est possible depuis ce serveur.
 # Every DuckDB connection opened by the tools is read_only=True (see mcp_server/tools/*.py):
 # no write is possible from this server.
 #
-# Transport : stdio en local (Claude Desktop, Claude Code) — streamable-http
+# Transport : stdio en local (Claude Desktop, Claude Code) - streamable-http
 # quand déployé sur Cloud Run, piloté par les variables MCP_TRANSPORT et PORT
-# Transport: stdio locally (Claude Desktop, Claude Code) — streamable-http
+# Transport: stdio locally (Claude Desktop, Claude Code) - streamable-http
 # when deployed to Cloud Run, driven by the MCP_TRANSPORT and PORT variables
 
 import os
@@ -95,11 +95,11 @@ def outil_analyse_reclamations(category: str = None) -> dict:
 async def resynchroniser(request):
     # Route interne (pas un outil MCP) appelée par le dashboard juste après un
     # recalcul persisté, pour que ce serveur relise GCS immédiatement plutôt que
-    # d'attendre son propre redémarrage naturel — protégée par ApiKeyMiddleware
+    # d'attendre son propre redémarrage naturel - protégée par ApiKeyMiddleware
     # comme le reste du transport HTTP
     # Internal route (not an MCP tool) called by the dashboard right after a
     # persisted recompute, so this server re-reads GCS immediately instead of
-    # waiting for its own natural restart — protected by ApiKeyMiddleware like
+    # waiting for its own natural restart - protected by ApiKeyMiddleware like
     # the rest of the HTTP transport
     succes = telecharger_depuis_gcs()
     return JSONResponse({"resynchronise": succes})

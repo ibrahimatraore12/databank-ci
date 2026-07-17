@@ -13,8 +13,8 @@ from src.logger import log_event  # noqa: E402
 
 
 def _connexion_lecture_seule() -> duckdb.DuckDBPyConnection:
-    # Connexion DuckDB toujours en lecture seule — aucune écriture possible depuis le MCP
-    # DuckDB connection always read-only — no write possible from the MCP server
+    # Connexion DuckDB toujours en lecture seule - aucune écriture possible depuis le MCP
+    # DuckDB connection always read-only - no write possible from the MCP server
     return duckdb.connect(config.DUCKDB_PATH, read_only=True)
 
 

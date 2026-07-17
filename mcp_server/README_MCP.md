@@ -1,10 +1,10 @@
-# Serveur MCP — dataBank CI Customer 360
+# Serveur MCP - dataBank CI Customer 360
 
 > *[English version: [README_MCP_en.md](README_MCP_en.md)]*
 
 Serveur MCP (Model Context Protocol) exposant 5 outils en lecture seule sur
 le portefeuille dataBank CI. Toute connexion DuckDB ouverte par les outils
-est `read_only=True` — aucune écriture n'est possible depuis ce serveur.
+est `read_only=True` - aucune écriture n'est possible depuis ce serveur.
 
 ## Outils exposés
 
@@ -32,7 +32,7 @@ pyenv activate databank-ci-env
 python3 mcp_server/databank_mcp_server.py
 ```
 
-Par défaut le serveur communique en stdio (protocole MCP standard) — il
+Par défaut le serveur communique en stdio (protocole MCP standard) - il
 attend une connexion d'un client MCP (Claude Desktop, Claude Code, etc.).
 En production (Cloud Run), il tourne en `streamable-http` :
 
@@ -40,7 +40,7 @@ En production (Cloud Run), il tourne en `streamable-http` :
 MCP_TRANSPORT=streamable-http MCP_API_KEY=<clé> PORT=8080 python3 mcp_server/databank_mcp_server.py
 ```
 
-Chaque requête HTTP doit alors porter l'en-tête `X-API-Key: <clé>` — voir
+Chaque requête HTTP doit alors porter l'en-tête `X-API-Key: <clé>` - voir
 `ApiKeyMiddleware` dans `databank_mcp_server.py`.
 
 ## Configuration client (exemple Claude Desktop, en local)
@@ -71,7 +71,7 @@ n'est pas fixe : voir `src/storage_sync.py` et `docs/architecture.md` (section
   ce téléchargement sans redémarrer le processus. C'est ce qu'appelle
   `dashboard/components/mcp_client.py::resynchroniser_mcp()` juste après
   qu'un recalcul déclenché depuis l'onglet Administration a été persisté
-  dans GCS — pour que les réponses de l'Assistant IA reflètent les données
+  dans GCS - pour que les réponses de l'Assistant IA reflètent les données
   fraîches sans attendre le prochain redémarrage naturel de ce service.
 
 ## Note d'implémentation

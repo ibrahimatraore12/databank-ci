@@ -1,10 +1,10 @@
-# MCP Server — dataBank CI Customer 360
+# MCP Server - dataBank CI Customer 360
 
 > *[Version française disponible : [README_MCP.md](README_MCP.md)]*
 
 MCP (Model Context Protocol) server exposing 5 read-only tools over the
 dataBank CI portfolio. Every DuckDB connection opened by the tools is
-`read_only=True` — no write is possible from this server.
+`read_only=True` - no write is possible from this server.
 
 ## Exposed tools
 
@@ -32,7 +32,7 @@ pyenv activate databank-ci-env
 python3 mcp_server/databank_mcp_server.py
 ```
 
-By default the server communicates over stdio (standard MCP protocol) — it
+By default the server communicates over stdio (standard MCP protocol) - it
 waits for a connection from an MCP client (Claude Desktop, Claude Code,
 etc.). In production (Cloud Run), it runs in `streamable-http` mode:
 
@@ -40,7 +40,7 @@ etc.). In production (Cloud Run), it runs in `streamable-http` mode:
 MCP_TRANSPORT=streamable-http MCP_API_KEY=<key> PORT=8080 python3 mcp_server/databank_mcp_server.py
 ```
 
-Each HTTP request must then carry the `X-API-Key: <key>` header — see
+Each HTTP request must then carry the `X-API-Key: <key>` header - see
 `ApiKeyMiddleware` in `databank_mcp_server.py`.
 
 ## Client configuration (Claude Desktop example, local)
@@ -71,7 +71,7 @@ isn't fixed: see `src/storage_sync.py` and `docs/architecture_en.md`
   be re-triggered without restarting the process. This is what
   `dashboard/components/mcp_client.py::resynchroniser_mcp()` calls right
   after a recompute triggered from the Administration tab has been
-  persisted to GCS — so the AI Assistant's answers reflect fresh data
+  persisted to GCS - so the AI Assistant's answers reflect fresh data
   without waiting for this service's next natural restart.
 
 ## Implementation note
