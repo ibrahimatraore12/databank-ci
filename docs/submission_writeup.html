@@ -1,0 +1,153 @@
+<DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:0 20px;font-size:14px;line-height:1.6;color:#222}
+h1{font-size:22px;border-bottom:2px solid #FF4500;padding-bottom:8px}
+h2{font-size:16px;color:#0D0D0D;border-left:4px solid #FF4500;padding-left:10px;margin-top:24px}
+h3{font-size:14px;color:#333}
+code{background:#f5f5f5;padding:2px 6px;border-radius:3px;font-size:12px}
+pre{background:#f5f5f5;padding:12px;border-radius:5px}
+table{border-collapse:collapse;width:100%;margin:12px 0}
+th{background:#0D0D0D;color:white;padding:8px 12px;text-align:left}
+td{border:1px solid #ddd;padding:8px 12px}
+tr:nth-child(even){background:#f9f9f9}
+</style>
+</head>
+<body>
+# Note de présentation - dataBank CI Customer 360
+
+> *[English version: [submission_writeup_en.md](submission_writeup_en.md)]*
+
+**Auteur :** Ibrahima TRAORÉ - Analytics Engineer
+**Date :** Juillet 2026
+**Dashboard en production :** https://databank-ci-264685034714.europe-west9.run.app
+
+## 1. Ce que j'ai construit
+
+J'ai construit une chaîne complète de traitement des données, du début à la
+fin. Elle part d'un fichier Excel source (10 feuilles, 140 clients réels) et
+va jusqu'à un tableau de bord Streamlit en ligne, ainsi qu'un serveur MCP
+que l'on peut interroger en langage courant. Entre les deux, les données
+passent par une transformation dbt en trois étapes, puis par un pipeline de
+Machine Learning qui compare plusieurs façons de calculer un score de
+risque.
+
+Relancer tout le pipeline (récupération des données + enrichissement +
+génération de données synthétiques, transformation dbt, entraînement du
+modèle) prend moins de 60 secondes sur ma machine de développement. C'est
+un temps mesuré, pas une estimation, et il ne compte pas le démarrage du
+tableau de bord lui-même.
+
+## 2. Les décisions importantes
+
+**J'ai choisi l'architecture "médaillon"** (Bronze/Silver/Gold, avec DuckDB
+et dbt) parce qu'elle peut être rejouée sans risque et qu'elle s'intègre
+naturellement avec dbt. Le détail et les autres options envisagées (star
+schema, Data Vault) sont expliqués dans `docs/architecture.md`.
+
+**J'ai calculé le score de désengagement en deux temps**, plutôt que de me
+reposer sur un seul modèle de Machine Learning présenté comme une vérité
+absolue : d'abord un score basé sur des règles métier claires
+(`ml/rules.py`, toujours disponible même sans modèle entraîné), puis un
+essai de Machine Learning supervisé sur un indicateur approché
+(`ml/comparison.py`). En effet, le fichier source ne contient aucun départ
+de client confirmé. La définition complète du problème et ses limites sont
+expliquées dans `docs/ml_problem_definition.md`.
+
+**J'ai choisi le modèle mis en production pour sa fiabilité, pas pour son
+meilleur score brut.** Sur le jeu de données enrichi (540 clients, dont 151
+partis), la comparaison donne un score AUC (un indicateur de qualité de
+prédiction, entre 0 et 1) de 1,0 pour RandomForest et XGBoost, contre 0,944
+pour la régression logistique. Je n'ai pas retenu les deux premiers modèles.
+Pourquoi ? Les clients synthétiques sont des copies statistiques de clients
+réels (voir `docs/synthetic_data_rationale.md`), et un modèle très puissant
+peut "apprendre par cœur" ces copies au lieu de comprendre la tendance
+générale. J'ai donc gardé la régression logistique
+(`ml/artifacts/churn_scoring_logistic.pkl`) comme modèle principal, et
+j'explique ce choix en détail dans `docs/model_comparison.md`, plutôt que
+de présenter un score parfait comme une réussite.
+
+**J'ai créé 400 clients synthétiques** pour faire passer le volume de test
+de 140 à 540 clients. Chaque client généré reste identifiable
+(`is_synthetic=True`, visible du Bronze jusqu'au tableau de bord), et j'ai
+vérifié statistiquement que ces données restent réalistes grâce à un test
+de Kolmogorov-Smirnov sur la distribution des revenus. Détails dans
+`docs/synthetic_data_rationale.md`.
+
+**J'ai imposé une règle stricte : aucun nom de colonne technique**
+(`risk_band`, `nb_reclamations_ouvertes`...) n'apparaît jamais dans le
+tableau de bord. Tout texte affiché passe par
+`dashboard/components/ui.py::LABELS`, puis par les fichiers
+`i18n/{fr,en}.json`, y compris les titres de graphiques, les en-têtes de
+tableaux et les messages d'alerte.
+
+**J'ai relié le tableau de bord au serveur MCP par une vraie connexion
+HTTP**, et non par un simple import de code Python. La page "Assistant IA"
+appelle le serveur MCP déployé (protocole `streamable-http`, avec clé
+d'accès) via un vrai client MCP (`dashboard/components/mcp_client.py`). Les
+réponses passent donc réellement par ce protocole, sans raccourci en
+mémoire.
+
+**J'ai ajouté une sauvegarde des données sur Google Cloud Storage (GCS)**
+pour les fichiers chargés depuis l'onglet Administration. Sans cela,
+l'hébergement utilisé (Cloud Run) perdrait toutes les données à chaque
+redémarrage, car il ne garde rien en mémoire de façon permanente. Le
+fonctionnement : un fichier chargé par un utilisateur métier est d'abord
+vérifié, puis tout le pipeline est relancé (environ 55 secondes mesurées,
+dans un espace isolé), et le résultat est sauvegardé dans un espace GCS que
+chaque copie de l'application relit à son démarrage (`src/storage_sync.py`,
+détaillé dans `docs/architecture.md` section 6). J'ai aussi ajouté une
+vérification de version du schéma des données. Cette protection évite qu'un
+futur changement de structure dans dbt soit écrasé sans le vouloir par une
+ancienne sauvegarde restaurée depuis GCS.
+
+**J'ai donné aux 9 pages du tableau de bord une seule et même identité
+visuelle** (couleurs noir et orange, éléments communs définis dans
+`dashboard/components/ui.py` : bandeau de page, guide de lecture, en-têtes
+de section, cartes d'indicateurs avec code couleur rouge/orange/vert,
+messages d'alerte), plutôt que de laisser chaque page avoir son propre
+style. Le tableau de bord se lit ainsi comme un seul outil cohérent. J'ai
+gardé la palette de couleurs des segments déjà validée plutôt que les
+couleurs prévues initialement, après avoir remarqué que deux d'entre elles
+étaient trop proches pour être bien distinguées par une personne
+daltonienne. Chaque page qui montre des alertes affiche aussi un signal
+positif réel (portefeuille en bonne santé, opportunités identifiées), pas
+seulement des risques. Le détail de ces choix est dans `docs/decisions.md`.
+
+## 3. Une vraie conclusion d'analyse, pas un conseil générique
+
+En regardant uniquement les clients réels (les clients synthétiques sont
+exclus, pour ne pas compter une copie comme un deuxième client), 2 clients
+du segment Premier ont un niveau de risque de crédit élevé
+(`risk_band = High`) : Murielle Aka (score de risque 26,4/100, solde 6,44 M
+FCFA) et Bintou Soro (score 19,0/100, solde 5,52 M FCFA), soit un solde
+combiné de 11,97 M FCFA. Ce sont les 2 seuls clients Premier dans ce cas,
+sur les 49 clients réels de ce segment. La priorité commerciale immédiate,
+identifiée directement par le tableau de bord (page Rétention et Risque),
+est donc claire : appeler ces 2 comptes sous 48 heures. Ce n'est pas un
+conseil générique du type "contacter les clients à risque".
+
+## 4. Les limites, dites sans détour
+
+- Le jeu de données réel est petit (140 clients, 34 prêts, 42 réclamations).
+  Détail dans `docs/ml_problem_definition.md`, section 6.
+- Le NBI (Net Banking Income, un indicateur de revenu généré par le client)
+  affiché est une estimation calculée par une formule standard, pas le
+  chiffre comptable réel du client. Voir `docs/decisions.md`.
+- Les scores quasi parfaits de RandomForest et XGBoost sur le jeu de données
+  enrichi ne garantissent pas qu'ils fonctionneraient aussi bien en
+  production sur de nouveaux clients jamais vus. Voir
+  `docs/model_comparison.md`.
+- Ce projet reste un outil d'aide à la décision : aucune action n'est
+  déclenchée automatiquement à partir d'un score. Une personne reste
+  toujours dans la boucle de décision.
+
+## 5. Outils utilisés
+
+Python 3.11 · dbt-duckdb · DuckDB · scikit-learn/XGBoost · MLflow ·
+Streamlit · Model Context Protocol (MCP) · Docker · Google Cloud Run.
+
+</body>
+</html>
