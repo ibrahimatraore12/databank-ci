@@ -54,7 +54,7 @@ def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
     if len(y_test) < MIN_SAMPLES_RELIABLE or y_test.sum() < MIN_POSITIFS_RELIABLE:
         metrics["avertissement"] = (
             f"Echantillon de test trop petit (n={len(y_test)}, positifs={int(y_test.sum())}) "
-            "pour des métriques statistiquement fiables — voir docs/ml_problem_definition.md"
+            "pour des métriques statistiquement fiables - voir docs/ml_problem_definition.md"
         )
         log_event("ml", "WARNING", "[ML][evaluate_model] ECHANTILLON INSUFFISANT", metrics)
     else:
@@ -64,9 +64,9 @@ def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
 
 
 def compute_roc_data(model, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
-    # Courbe ROC + seuil retenu par le critère de Youden (maximise TPR-FPR) —
+    # Courbe ROC + seuil retenu par le critère de Youden (maximise TPR-FPR) -
     # un choix de seuil réel, pas une valeur arbitraire recopiée d'un exemple
-    # ROC curve + threshold picked by Youden's criterion (maximizes TPR-FPR) —
+    # ROC curve + threshold picked by Youden's criterion (maximizes TPR-FPR) -
     # a real threshold choice, not an arbitrary value copied from an example
     y_proba = model.predict_proba(X_test)[:, 1]
     fpr, tpr, seuils = roc_curve(y_test, y_proba)
@@ -87,10 +87,10 @@ def compute_roc_data(model, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
 
 def calculate_psi(reference: pd.Series, actuel: pd.Series, nb_bins: int = 10) -> float:
     # PSI (Population Stability Index) entre deux distributions, sur des bins
-    # définis par les quantiles de la distribution de référence — stable si < 0,1,
+    # définis par les quantiles de la distribution de référence - stable si < 0,1,
     # dérive modérée si < 0,2, dérive significative au-delà
     # PSI (Population Stability Index) between two distributions, on bins defined
-    # by the reference distribution's quantiles — stable if < 0.1, moderate drift
+    # by the reference distribution's quantiles - stable if < 0.1, moderate drift
     # if < 0.2, significant drift beyond
     quantiles = np.linspace(0, 1, nb_bins + 1)
     bornes = np.unique(reference.quantile(quantiles).values)

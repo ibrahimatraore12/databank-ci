@@ -1,5 +1,5 @@
-# Étude comparative de modèles — Scénario A (réel) vs Scénario B (enrichi synthétique)
-# Comparative model study — Scenario A (real) vs Scenario B (enriched synthetic)
+# Étude comparative de modèles - Scénario A (réel) vs Scénario B (enrichi synthétique)
+# Comparative model study - Scenario A (real) vs Scenario B (enriched synthetic)
 
 import os
 
@@ -77,11 +77,11 @@ def _generer_rapport_markdown(rapport: pd.DataFrame, df_reel: pd.DataFrame, df_e
     # Generates docs/model_comparison.md from the comparison results
     chemin = os.path.join(config.PROJECT_ROOT, "docs", "model_comparison.md")
     lignes = [
-        "# Étude comparative de modèles — dataBank CI Customer 360",
+        "# Étude comparative de modèles - dataBank CI Customer 360",
         "",
         "> *[English version: [model_comparison_en.md](model_comparison_en.md)]*",
         "",
-        "**Généré automatiquement par `ml/comparison.py` — ne pas éditer à la main.**",
+        "**Généré automatiquement par `ml/comparison.py` - ne pas éditer à la main.**",
         "",
         f"- Scénario A : {len(df_reel)} clients réels, {int(df_reel['churn_flag'].sum())} positifs "
         f"({100 * df_reel['churn_flag'].mean():.1f} %)",
@@ -100,7 +100,7 @@ def _generer_rapport_markdown(rapport: pd.DataFrame, df_reel: pd.DataFrame, df_e
         "**Sur les scores quasi parfaits du Scénario B (RandomForest, XGBoost) :** les clients "
         "synthétiques sont générés par bootstrap métier à partir des clients réels (voir "
         "`src/synthetic_data_generator.py`), donc statistiquement très proches de leur client source. "
-        "Un modèle capacitaire (forêt, boosting) peut mémoriser ces motifs facilement — ces scores "
+        "Un modèle capacitaire (forêt, boosting) peut mémoriser ces motifs facilement - ces scores "
         "élevés reflètent la facilité du jeu synthétique, pas une garantie de performance en "
         "production sur des clients inédits.",
         "",

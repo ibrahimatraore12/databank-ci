@@ -1,5 +1,5 @@
-# Score de règles métier — Phase 1 — toujours calculé, même sans modèle ML
-# Business rule score — Phase 1 — always computed, even without an ML model
+# Score de règles métier - Phase 1 - toujours calculé, même sans modèle ML
+# Business rule score - Phase 1 - always computed, even without an ML model
 
 import pandas as pd
 
@@ -53,10 +53,10 @@ def calculate_risk_score(df: pd.DataFrame) -> pd.DataFrame:
 
 def decompose_risk_score(df: pd.DataFrame, customer_id: str) -> dict:
     # Décompose le score de risque d'un client en ses 4 contributions pondérées,
-    # sur la même normalisation min-max que calculate_risk_score (portefeuille de df) —
+    # sur la même normalisation min-max que calculate_risk_score (portefeuille de df) -
     # sert à expliquer le score dans la fiche client (Vue 360°)
     # Decomposes a customer's risk score into its 4 weighted contributions, on the
-    # same min-max normalization as calculate_risk_score (df's portfolio) — used to
+    # same min-max normalization as calculate_risk_score (df's portfolio) - used to
     # explain the score in the customer record (360 view)
     colonnes_requises = [
         "customer_id", "recency_jours", "nb_reclamations_ouvertes",

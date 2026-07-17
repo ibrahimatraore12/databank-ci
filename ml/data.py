@@ -10,10 +10,10 @@ import config
 from ml.registry import load_preprocessor, save_preprocessor
 from src.logger import log_event
 
-# Features numériques utilisées par le modèle — risque_composite est exclu
+# Features numériques utilisées par le modèle - risque_composite est exclu
 # volontairement pour éviter la fuite de label (il partage les mêmes signaux
 # que le label enrichi calculé ci-dessous)
-# Numeric features used by the model — risque_composite is deliberately
+# Numeric features used by the model - risque_composite is deliberately
 # excluded to avoid label leakage (it shares the same signals as the
 # enriched label computed below)
 FEATURE_COLUMNS = [
