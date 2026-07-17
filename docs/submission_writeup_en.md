@@ -8,104 +8,115 @@
 
 ## 1. What I built
 
-I built an end-to-end analytics engineering platform: from a source Excel
-file (10 sheets, 140 real customers) to a deployed Streamlit dashboard and an
-MCP server queryable in natural language, going through a three-layer dbt
-transformation and an ML pipeline comparing several scoring approaches.
+I built a complete data pipeline, start to finish. It starts from a source
+Excel file (10 sheets, 140 real customers) and ends with a live Streamlit
+dashboard, plus an MCP server you can query in plain language. In between,
+the data goes through a three-stage dbt transformation, then a Machine
+Learning pipeline that compares several ways of computing a risk score.
 
-End to end, replaying the whole pipeline (ingestion + enrichment + synthetic
-generation, dbt transformation, ML training) takes under 60 seconds on my
-development machine - a measured time, not an estimate, excluding the
-dashboard's own startup.
+Replaying the whole pipeline (loading the data + enrichment + synthetic
+data generation, dbt transformation, model training) takes under 60 seconds
+on my development machine. That's a measured time, not an estimate, and it
+doesn't include the dashboard's own startup time.
 
 ## 2. The decisions that matter
 
-**I chose the medallion architecture** (Bronze/Silver/Gold on DuckDB,
-orchestrated by dbt) for its idempotence and native fit with dbt - see
-`docs/architecture_en.md` for the detail and the alternatives ruled out
-(star schema, Data Vault).
+**I chose the "medallion" architecture** (Bronze/Silver/Gold, with DuckDB
+and dbt) because it can be re-run safely and fits naturally with dbt. The
+detail, along with the other options considered (star schema, Data Vault),
+is explained in `docs/architecture_en.md`.
 
-**I treated the disengagement score in two phases**, not as a single ML
-model presented as ground truth: an explicit rule-based score (`ml/rules.py`,
-always available without a trained model) and a supervised ML experiment on
-a proxy label (`ml/comparison.py`). The source dataset contains no confirmed
-customer departure - see `docs/ml_problem_definition_en.md` for the full
-problem definition and its limitations.
+**I computed the disengagement score in two steps**, instead of relying on
+a single Machine Learning model presented as absolute truth: first a score
+based on clear business rules (`ml/rules.py`, always available even without
+a trained model), then a supervised Machine Learning experiment on an
+approximate label (`ml/comparison.py`). That's because the source file
+contains no confirmed customer departure. The full problem definition and
+its limits are explained in `docs/ml_problem_definition_en.md`.
 
-**I chose the production model on a robustness criterion, not the raw best
-score.** The comparison on the enriched dataset (540 customers, 151
-positives) gives an AUC of 1.0 for both RandomForest and XGBoost, versus
-0.944 for logistic regression. I did not retain the first two: synthetic
-customers are bootstrap copies of real customers (see
-`docs/synthetic_data_rationale_en.md`), and a high-capacity model can
-memorize these patterns without generalizing. I retained logistic regression
-(`ml/artifacts/churn_scoring_logistic.pkl`) as the champion model,
-documenting this choice in `docs/model_comparison_en.md` rather than
-presenting the perfect score as a win.
+**I chose the model used in production for its reliability, not its raw
+best score.** On the enriched dataset (540 customers, 151 of whom left),
+the comparison gives an AUC score (a prediction-quality indicator, between
+0 and 1) of 1.0 for both RandomForest and XGBoost, versus 0.944 for
+logistic regression. I did not keep the first two models. Why? Synthetic
+customers are statistical copies of real customers (see
+`docs/synthetic_data_rationale_en.md`), and a very powerful model can
+"memorize" these copies instead of understanding the general trend. So I
+kept logistic regression (`ml/artifacts/churn_scoring_logistic.pkl`) as the
+main model, and I explain this choice in detail in
+`docs/model_comparison_en.md`, rather than presenting a perfect score as a
+win.
 
-**I generated 400 synthetic customers** to bring the test volume from 140 to
-540 customers, with strict traceability (`is_synthetic=True` visible from
-Bronze to the dashboard) and statistical validation via a Kolmogorov-Smirnov
-test on the income distribution - see `docs/synthetic_data_rationale_en.md`.
+**I created 400 synthetic customers** to raise the test volume from 140 to
+540 customers. Every generated customer stays identifiable
+(`is_synthetic=True`, visible from Bronze all the way to the dashboard),
+and I statistically checked that this data stays realistic using a
+Kolmogorov-Smirnov test on the income distribution. Details in
+`docs/synthetic_data_rationale_en.md`.
 
-**I enforced a strict semantic layer**: no technical column name
-(`risk_band`, `nb_reclamations_ouvertes`...) appears in the dashboard.
-Everything goes through `dashboard/components/ui.py::LABELS` then through
-`i18n/{fr,en}.json`, including chart titles, table headers, and alert
-messages.
+**I enforced one strict rule: no technical column name**
+(`risk_band`, `nb_reclamations_ouvertes`...) is ever shown on the
+dashboard. Every piece of displayed text goes through
+`dashboard/components/ui.py::LABELS`, then through the
+`i18n/{fr,en}.json` files, including chart titles, table headers, and
+alert messages.
 
-**I connected the dashboard to the MCP server over real HTTP**, not via a
-direct Python import: the AI Assistant page calls the deployed MCP server
-(`streamable-http`, API key) through a real MCP client
-(`dashboard/components/mcp_client.py`), so answers actually go through the
-protocol rather than an in-memory shortcut.
+**I connected the dashboard to the MCP server through a real HTTP
+connection**, not a simple Python code import. The "AI Assistant" page
+calls the deployed MCP server (`streamable-http` protocol, with an access
+key) through a real MCP client (`dashboard/components/mcp_client.py`).
+Answers genuinely go through this protocol, with no in-memory shortcut.
 
-**I added a GCS persistence layer for Administration-tab data uploads**,
-rather than accepting that stateless Cloud Run loses everything on every
-restart. A file uploaded by the business is validated, recomputed (full
-pipeline, ~55 seconds measured in an isolated container), then saved to a
-GCS bucket that every instance re-reads at its own startup
+**I added a data backup on Google Cloud Storage (GCS)** for files uploaded
+from the Administration tab. Without it, the hosting platform used (Cloud
+Run) would lose all data on every restart, since it doesn't keep anything
+permanently in memory. How it works: a file uploaded by a business user is
+first checked, then the whole pipeline runs again (about 55 seconds
+measured, in an isolated space), and the result is saved to a GCS location
+that every copy of the app reloads on its own startup
 (`src/storage_sync.py`, detailed in `docs/architecture_en.md` section 6). I
-added a schema-version guard after identifying, during design review, that
-a future dbt schema change could otherwise get silently overwritten by
-older data restored from GCS.
+also added a data-schema version check. This safeguard prevents a future
+structural change in dbt from being silently overwritten by an older
+backup restored from GCS.
 
-**I applied a single visual identity across the dashboard's 9 pages**
-(black/orange charte, shared components in `dashboard/components/ui.py`:
-banner, reading guide, section headers, RAG-thresholded KPI cards, alerts)
-instead of ad hoc per-page styling, so the dashboard reads as one coherent
-tool. I kept the already-validated segment color palette instead of the
-colors initially proposed for the charte, after finding two of them were
-too close for color-vision-deficient users. Every alert-bearing page also
-shows a real positive signal (healthy portfolio, identified opportunities),
-not just risks - see `docs/decisions_en.md` for the detail behind these
-choices.
+**I gave the dashboard's 9 pages one single, shared visual identity**
+(black and orange colors, shared building blocks defined in
+`dashboard/components/ui.py`: page banner, reading guide, section headers,
+indicator cards with red/orange/green color coding, alert messages),
+instead of letting each page have its own style. The dashboard now reads as
+one coherent tool. I kept the already-validated segment color palette
+instead of the colors originally planned, after noticing two of them were
+too close to be clearly told apart by color-vision-deficient users. Every
+page that shows alerts also displays a real positive signal (healthy
+portfolio, identified opportunities), not just risks. The detail behind
+these choices is in `docs/decisions_en.md`.
 
-## 3. An analytical conclusion, not a generic suggestion
+## 3. A real analytical conclusion, not generic advice
 
-On the real portfolio (excluding synthetic customers, to avoid presenting a
-duplicate as two distinct customers), 2 Premier-segment customers show a
+Looking only at real customers (synthetic customers are excluded, so a copy
+isn't counted as a second customer), 2 Premier-segment customers have a
 high credit risk level (`risk_band = High`): Murielle Aka (risk score
-26.4/100, balance 6.44M FCFA) and Bintou Soro (score 19.0/100, balance 5.52M
-FCFA) - combined balance 11.97M FCFA. These are the only 2 Premier customers
-in this situation among the segment's 49 real customers. An advisor call
-within 48h on these 2 accounts is the immediate commercial priority
-identified by the dashboard (Retention and Risk page) - not a generic
-recommendation to "contact at-risk customers."
+26.4/100, balance 6.44M FCFA) and Bintou Soro (score 19.0/100, balance
+5.52M FCFA), for a combined balance of 11.97M FCFA. These are the only 2
+Premier customers in this situation, out of the segment's 49 real
+customers. The dashboard (Retention and Risk page) points to a clear,
+immediate business priority: call these 2 accounts within 48 hours. This is
+not generic advice like "contact at-risk customers."
 
 ## 4. Limitations, stated plainly
 
-- The real dataset is small (140 customers, 34 loans, 42 complaints) - see
-  `docs/ml_problem_definition_en.md` section 6 for detail.
-- NBI is a standard-formula estimate, not the customer's real accounting NBI
-  - `docs/decisions_en.md`.
-- The near-perfect RandomForest/XGBoost scores on the enriched dataset are
-  not a guarantee of production performance on unseen customers -
-  `docs/model_comparison_en.md`.
+- The real dataset is small (140 customers, 34 loans, 42 complaints).
+  Detail in `docs/ml_problem_definition_en.md`, section 6.
+- The NBI (Net Banking Income, a revenue indicator generated by the
+  customer) shown is an estimate computed with a standard formula, not the
+  customer's real accounting figure. See `docs/decisions_en.md`.
+- The near-perfect RandomForest and XGBoost scores on the enriched dataset
+  don't guarantee they would work as well in production on new, unseen
+  customers. See `docs/model_comparison_en.md`.
 - This project remains a decision-support tool: no action is triggered
-  automatically from a score, the human stays in the loop.
+  automatically from a score. A person always stays in the decision loop.
 
-## 5. Stack
+## 5. Tools used
 
 Python 3.11 · dbt-duckdb · DuckDB · scikit-learn/XGBoost · MLflow ·
 Streamlit · Model Context Protocol (MCP) · Docker · Google Cloud Run.

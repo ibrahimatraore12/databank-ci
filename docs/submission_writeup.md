@@ -1,4 +1,4 @@
-# Note de soumission - dataBank CI Customer 360
+# Note de présentation - dataBank CI Customer 360
 
 > *[English version: [submission_writeup_en.md](submission_writeup_en.md)]*
 
@@ -8,108 +8,125 @@
 
 ## 1. Ce que j'ai construit
 
-J'ai construit une plateforme analytics engineering de bout en bout : d'un
-fichier Excel source (10 feuilles, 140 clients réels) jusqu'à un dashboard
-Streamlit déployé et un serveur MCP interrogeable en langage naturel, en
-passant par une transformation dbt en trois couches et un pipeline ML
-comparant plusieurs approches de scoring.
+J'ai construit une chaîne complète de traitement des données, du début à la
+fin. Elle part d'un fichier Excel source (10 feuilles, 140 clients réels) et
+va jusqu'à un tableau de bord Streamlit en ligne, ainsi qu'un serveur MCP
+que l'on peut interroger en langage courant. Entre les deux, les données
+passent par une transformation dbt en trois étapes, puis par un pipeline de
+Machine Learning qui compare plusieurs façons de calculer un score de
+risque.
 
-De bout en bout, rejouer tout le pipeline (ingestion + enrichissement +
-génération synthétique, transformation dbt, entraînement ML) prend moins de
-60 secondes sur ma machine de développement - un temps mesuré, pas estimé,
-qui exclut le démarrage du dashboard lui-même.
+Relancer tout le pipeline (récupération des données + enrichissement +
+génération de données synthétiques, transformation dbt, entraînement du
+modèle) prend moins de 60 secondes sur ma machine de développement. C'est
+un temps mesuré, pas une estimation, et il ne compte pas le démarrage du
+tableau de bord lui-même.
 
-## 2. Les décisions qui comptent
+## 2. Les décisions importantes
 
-**J'ai retenu l'architecture médaillon** (Bronze/Silver/Gold sur DuckDB,
-orchestrée par dbt) pour son idempotence et sa compatibilité native avec dbt
-- voir `docs/architecture.md` pour le détail et les alternatives écartées
-(star schema, Data Vault).
+**J'ai choisi l'architecture "médaillon"** (Bronze/Silver/Gold, avec DuckDB
+et dbt) parce qu'elle peut être rejouée sans risque et qu'elle s'intègre
+naturellement avec dbt. Le détail et les autres options envisagées (star
+schema, Data Vault) sont expliqués dans `docs/architecture.md`.
 
-**J'ai traité le score de désengagement en deux phases**, pas comme un seul
-modèle ML présenté comme vérité terrain : un scoring de règles métier
-explicite (`ml/rules.py`, toujours disponible sans modèle entraîné) et une
-expérimentation ML supervisée sur un label proxy (`ml/comparison.py`). Le
-dataset source ne contient aucun départ client confirmé - voir
-`docs/ml_problem_definition.md` pour la définition complète du problème et
-ses limites.
+**J'ai calculé le score de désengagement en deux temps**, plutôt que de me
+reposer sur un seul modèle de Machine Learning présenté comme une vérité
+absolue : d'abord un score basé sur des règles métier claires
+(`ml/rules.py`, toujours disponible même sans modèle entraîné), puis un
+essai de Machine Learning supervisé sur un indicateur approché
+(`ml/comparison.py`). En effet, le fichier source ne contient aucun départ
+de client confirmé. La définition complète du problème et ses limites sont
+expliquées dans `docs/ml_problem_definition.md`.
 
-**J'ai choisi le modèle en production sur un critère de robustesse, pas sur
-le meilleur score brut.** La comparaison sur le jeu enrichi (540 clients,
-151 positifs) donne un AUC de 1,0 pour RandomForest et XGBoost, contre 0,944
-pour la régression logistique. Je n'ai pas retenu les deux premiers : les
-clients synthétiques sont des copies bootstrap de clients réels (voir
-`docs/synthetic_data_rationale.md`), et un modèle à forte capacité peut
-mémoriser ces motifs sans généraliser. J'ai retenu la régression logistique
-(`ml/artifacts/churn_scoring_logistic.pkl`) comme modèle champion,
-documentant ce choix dans `docs/model_comparison.md` plutôt que de présenter
-le score parfait comme une réussite.
+**J'ai choisi le modèle mis en production pour sa fiabilité, pas pour son
+meilleur score brut.** Sur le jeu de données enrichi (540 clients, dont 151
+partis), la comparaison donne un score AUC (un indicateur de qualité de
+prédiction, entre 0 et 1) de 1,0 pour RandomForest et XGBoost, contre 0,944
+pour la régression logistique. Je n'ai pas retenu les deux premiers modèles.
+Pourquoi ? Les clients synthétiques sont des copies statistiques de clients
+réels (voir `docs/synthetic_data_rationale.md`), et un modèle très puissant
+peut "apprendre par cœur" ces copies au lieu de comprendre la tendance
+générale. J'ai donc gardé la régression logistique
+(`ml/artifacts/churn_scoring_logistic.pkl`) comme modèle principal, et
+j'explique ce choix en détail dans `docs/model_comparison.md`, plutôt que
+de présenter un score parfait comme une réussite.
 
-**J'ai généré 400 clients synthétiques** pour porter le volume de test de
-140 à 540 clients, avec traçabilité stricte (`is_synthetic=True` visible du
-Bronze au dashboard) et validation statistique par test de
-Kolmogorov-Smirnov sur la distribution du revenu - voir
+**J'ai créé 400 clients synthétiques** pour faire passer le volume de test
+de 140 à 540 clients. Chaque client généré reste identifiable
+(`is_synthetic=True`, visible du Bronze jusqu'au tableau de bord), et j'ai
+vérifié statistiquement que ces données restent réalistes grâce à un test
+de Kolmogorov-Smirnov sur la distribution des revenus. Détails dans
 `docs/synthetic_data_rationale.md`.
 
-**J'ai imposé une couche sémantique stricte** : aucun nom de colonne
-technique (`risk_band`, `nb_reclamations_ouvertes`...) n'apparaît dans le
-dashboard. Tout passe par `dashboard/components/ui.py::LABELS` puis par les
-fichiers `i18n/{fr,en}.json`, y compris les titres de graphiques, les
-en-têtes de tableaux et les messages d'alerte.
+**J'ai imposé une règle stricte : aucun nom de colonne technique**
+(`risk_band`, `nb_reclamations_ouvertes`...) n'apparaît jamais dans le
+tableau de bord. Tout texte affiché passe par
+`dashboard/components/ui.py::LABELS`, puis par les fichiers
+`i18n/{fr,en}.json`, y compris les titres de graphiques, les en-têtes de
+tableaux et les messages d'alerte.
 
-**J'ai connecté le dashboard au serveur MCP en HTTP réel**, pas par import
-Python direct : la page Assistant IA appelle le serveur MCP déployé
-(`streamable-http`, clé API) via un vrai client MCP
-(`dashboard/components/mcp_client.py`), pour que les réponses passent
-réellement par le protocole plutôt que par un raccourci en mémoire.
+**J'ai relié le tableau de bord au serveur MCP par une vraie connexion
+HTTP**, et non par un simple import de code Python. La page "Assistant IA"
+appelle le serveur MCP déployé (protocole `streamable-http`, avec clé
+d'accès) via un vrai client MCP (`dashboard/components/mcp_client.py`). Les
+réponses passent donc réellement par ce protocole, sans raccourci en
+mémoire.
 
-**J'ai ajouté une couche de persistance GCS pour l'upload de données depuis
-l'Administration**, plutôt que d'accepter que Cloud Run (stateless) perde
-tout à chaque redémarrage. Un fichier chargé par le métier est validé,
-recalculé (pipeline complet, ~55 secondes mesurées dans un conteneur isolé),
-puis sauvegardé dans un bucket GCS que chaque instance relit à son démarrage
-(`src/storage_sync.py`, détaillé dans `docs/architecture.md` section 6). J'ai
-ajouté un garde-fou de version de schéma après avoir identifié, en revue de
-conception, qu'un futur changement de schéma dbt pourrait sinon se faire
-silencieusement écraser par une ancienne donnée restaurée depuis GCS.
+**J'ai ajouté une sauvegarde des données sur Google Cloud Storage (GCS)**
+pour les fichiers chargés depuis l'onglet Administration. Sans cela,
+l'hébergement utilisé (Cloud Run) perdrait toutes les données à chaque
+redémarrage, car il ne garde rien en mémoire de façon permanente. Le
+fonctionnement : un fichier chargé par un utilisateur métier est d'abord
+vérifié, puis tout le pipeline est relancé (environ 55 secondes mesurées,
+dans un espace isolé), et le résultat est sauvegardé dans un espace GCS que
+chaque copie de l'application relit à son démarrage (`src/storage_sync.py`,
+détaillé dans `docs/architecture.md` section 6). J'ai aussi ajouté une
+vérification de version du schéma des données. Cette protection évite qu'un
+futur changement de structure dans dbt soit écrasé sans le vouloir par une
+ancienne sauvegarde restaurée depuis GCS.
 
-**J'ai appliqué une identité visuelle unique aux 9 pages du dashboard**
-(charte noir/orange, composants communs dans `dashboard/components/ui.py` :
-bandeau, guide de lecture, en-têtes de section, cartes KPI à seuil RAG,
-alertes) plutôt qu'un style ad hoc par page, pour que le dashboard se lise
-comme un seul outil cohérent. J'ai gardé la palette de couleurs de segment
-déjà validée plutôt que les couleurs initialement proposées pour la charte,
-après avoir constaté que deux d'entre elles étaient trop proches pour un
-daltonien. Chaque page d'alerte montre aussi un signal positif réel
-(portefeuille sain, opportunités identifiées), pas seulement des risques -
-voir `docs/decisions.md` pour le détail de ces choix.
+**J'ai donné aux 9 pages du tableau de bord une seule et même identité
+visuelle** (couleurs noir et orange, éléments communs définis dans
+`dashboard/components/ui.py` : bandeau de page, guide de lecture, en-têtes
+de section, cartes d'indicateurs avec code couleur rouge/orange/vert,
+messages d'alerte), plutôt que de laisser chaque page avoir son propre
+style. Le tableau de bord se lit ainsi comme un seul outil cohérent. J'ai
+gardé la palette de couleurs des segments déjà validée plutôt que les
+couleurs prévues initialement, après avoir remarqué que deux d'entre elles
+étaient trop proches pour être bien distinguées par une personne
+daltonienne. Chaque page qui montre des alertes affiche aussi un signal
+positif réel (portefeuille en bonne santé, opportunités identifiées), pas
+seulement des risques. Le détail de ces choix est dans `docs/decisions.md`.
 
-## 3. Une conclusion d'analyse, pas une suggestion générique
+## 3. Une vraie conclusion d'analyse, pas un conseil générique
 
-Sur le portefeuille réel (hors clients synthétiques, pour ne pas présenter
-un doublon comme deux clients distincts), 2 clients du segment Premier
-affichent un niveau de risque crédit élevé (`risk_band = High`) : Murielle
-Aka (score de risque 26,4/100, solde 6,44 M FCFA) et Bintou Soro (score
-19,0/100, solde 5,52 M FCFA) - solde combiné 11,97 M FCFA. Ce sont les 2
-seuls clients Premier dans ce cas sur les 49 clients réels du segment. Un
-appel conseiller sous 48h sur ces 2 comptes est la priorité commerciale
-immédiate identifiée par le dashboard (page Rétention et Risque), pas une
-recommandation générique de "contacter les clients à risque".
+En regardant uniquement les clients réels (les clients synthétiques sont
+exclus, pour ne pas compter une copie comme un deuxième client), 2 clients
+du segment Premier ont un niveau de risque de crédit élevé
+(`risk_band = High`) : Murielle Aka (score de risque 26,4/100, solde 6,44 M
+FCFA) et Bintou Soro (score 19,0/100, solde 5,52 M FCFA), soit un solde
+combiné de 11,97 M FCFA. Ce sont les 2 seuls clients Premier dans ce cas,
+sur les 49 clients réels de ce segment. La priorité commerciale immédiate,
+identifiée directement par le tableau de bord (page Rétention et Risque),
+est donc claire : appeler ces 2 comptes sous 48 heures. Ce n'est pas un
+conseil générique du type "contacter les clients à risque".
 
-## 4. Les limites, énoncées sans détour
+## 4. Les limites, dites sans détour
 
-- Le dataset réel est petit (140 clients, 34 prêts, 42 réclamations) : voir
-  `docs/ml_problem_definition.md` section 6 pour le détail.
-- Le NBI est une estimation par formule standard, pas le NBI comptable réel
-  du client - `docs/decisions.md`.
-- Les scores quasi parfaits de RandomForest/XGBoost sur le jeu enrichi ne
-  sont pas une garantie de performance en production sur des clients
-  inédits - `docs/model_comparison.md`.
+- Le jeu de données réel est petit (140 clients, 34 prêts, 42 réclamations).
+  Détail dans `docs/ml_problem_definition.md`, section 6.
+- Le NBI (Net Banking Income, un indicateur de revenu généré par le client)
+  affiché est une estimation calculée par une formule standard, pas le
+  chiffre comptable réel du client. Voir `docs/decisions.md`.
+- Les scores quasi parfaits de RandomForest et XGBoost sur le jeu de données
+  enrichi ne garantissent pas qu'ils fonctionneraient aussi bien en
+  production sur de nouveaux clients jamais vus. Voir
+  `docs/model_comparison.md`.
 - Ce projet reste un outil d'aide à la décision : aucune action n'est
-  déclenchée automatiquement à partir d'un score, l'humain reste dans la
-  boucle.
+  déclenchée automatiquement à partir d'un score. Une personne reste
+  toujours dans la boucle de décision.
 
-## 5. Stack
+## 5. Outils utilisés
 
 Python 3.11 · dbt-duckdb · DuckDB · scikit-learn/XGBoost · MLflow ·
 Streamlit · Model Context Protocol (MCP) · Docker · Google Cloud Run.
