@@ -1,5 +1,5 @@
-# Dépendances du projet dataBank CI Customer 360 — Python 3.11.9
-# dataBank CI Customer 360 project dependencies — Python 3.11.9
+# Dépendances du projet dataBank CI Customer 360 - Python 3.11.9
+# dataBank CI Customer 360 project dependencies - Python 3.11.9
 
 pandas==2.3.3
 numpy==2.4.6

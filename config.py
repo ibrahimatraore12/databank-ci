@@ -24,10 +24,10 @@ SOURCE_SHEETS = [
 
 # Incrémenter uniquement quand un changement de schéma dbt (nouvelle colonne
 # dans un mart, etc.) rend un ancien pipeline_state.json/databank_ci.duckdb
-# restauré depuis GCS incompatible avec le code courant — voir src/storage_sync.py
+# restauré depuis GCS incompatible avec le code courant - voir src/storage_sync.py
 # Bump only when a dbt schema change (new mart column, etc.) makes an older
 # pipeline_state.json/databank_ci.duckdb restored from GCS incompatible with
-# the current code — see src/storage_sync.py
+# the current code - see src/storage_sync.py
 DATA_SCHEMA_VERSION = 1
 
 # Idempotence : graine fixée partout (dbt seed, split ML, génération synthétique)
@@ -39,8 +39,8 @@ RANDOM_SEED = 42
 LOAN_DPD_THRESHOLD_DAYS = 15
 CHURN_RISK_RECENCY_THRESHOLD_DAYS = 90
 
-# Pondération du score de règles métier (ml/rules.py) — Phase 1
-# Business rule score weighting (ml/rules.py) — Phase 1
+# Pondération du score de règles métier (ml/rules.py) - Phase 1
+# Business rule score weighting (ml/rules.py) - Phase 1
 RULES_WEIGHT_RECENCY = 0.40
 RULES_WEIGHT_COMPLAINTS = 0.30
 RULES_WEIGHT_DIGITAL = 0.20
@@ -53,8 +53,8 @@ ENGAGEMENT_WEIGHT_TRANSACTIONS = 0.25
 ENGAGEMENT_WEIGHT_DIGITAL = 0.25
 ENGAGEMENT_WEIGHT_PRODUCTS = 0.20
 
-# Formule NBI estimé (standard UEMOA simplifié) — voir docs/decisions.md
-# Estimated NBI formula (simplified UEMOA standard) — see docs/decisions.md
+# Formule NBI estimé (standard UEMOA simplifié) - voir docs/decisions.md
+# Estimated NBI formula (simplified UEMOA standard) - see docs/decisions.md
 NBI_BALANCE_RATE = 0.035
 NBI_PER_TRANSACTION_XOF = 500
 NBI_PER_PRODUCT_XOF = 15000

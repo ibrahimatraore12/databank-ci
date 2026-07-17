@@ -1,7 +1,7 @@
 [project]
 name = "databank-ci"
 version = "1.0.0"
-description = "dataBank CI Customer 360 — plateforme analytics engineering de bout en bout"
+description = "dataBank CI Customer 360 - plateforme analytics engineering de bout en bout"
 requires-python = ">=3.11"
 
 [tool.flake8]
