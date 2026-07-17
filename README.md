@@ -1,4 +1,4 @@
-# dataBank CI — Customer 360
+# dataBank CI - Customer 360
 
 > *[English version: [README_en.md](README_en.md)]*
 
@@ -6,7 +6,7 @@ Plateforme analytics engineering de bout en bout pour dataBank CI : ingestion,
 qualité des données, transformation dbt, scoring de désengagement client,
 dashboard Streamlit et serveur MCP pour l'exploration en langage naturel.
 
-**Auteur :** Ibrahima TRAORÉ — Analytics Engineer
+**Auteur :** Ibrahima TRAORÉ - Analytics Engineer
 **Stack :** Python · pyenv · dbt · DuckDB · MLflow · Streamlit · Docker
 
 ## Avant de coder : les documents de cadrage
@@ -16,12 +16,12 @@ Lire dans l'ordre avant toute modification (chaque document existe en FR et en E
 | Document | FR | EN |
 |----------|----|----|
 | Note de soumission (à lire en premier) | [FR](docs/submission_writeup.md) | [EN](docs/submission_writeup_en.md) |
-| Compréhension métier — décisions soutenues, KPIs | [FR](docs/business_understanding.md) | [EN](docs/business_understanding_en.md) |
-| Définition du problème ML — nature du problème, limites du label, déséquilibre de classes | [FR](docs/ml_problem_definition.md) | [EN](docs/ml_problem_definition_en.md) |
-| Architecture — médaillon, choix DuckDB, chemin de migration | [FR](docs/architecture.md) | [EN](docs/architecture_en.md) |
-| Diagramme ERD — schéma relationnel des tables source | [FR](docs/erd_diagram.md) | [EN](docs/erd_diagram_en.md) |
-| Dictionnaire de données — colonnes des 3 tables Gold | [FR](docs/data_dictionary.md) | [EN](docs/data_dictionary_en.md) |
-| Justification des données synthétiques — méthode et validation KS-test | [FR](docs/synthetic_data_rationale.md) | [EN](docs/synthetic_data_rationale_en.md) |
+| Compréhension métier - décisions soutenues, KPIs | [FR](docs/business_understanding.md) | [EN](docs/business_understanding_en.md) |
+| Définition du problème ML - nature du problème, limites du label, déséquilibre de classes | [FR](docs/ml_problem_definition.md) | [EN](docs/ml_problem_definition_en.md) |
+| Architecture - médaillon, choix DuckDB, chemin de migration | [FR](docs/architecture.md) | [EN](docs/architecture_en.md) |
+| Diagramme ERD - schéma relationnel des tables source | [FR](docs/erd_diagram.md) | [EN](docs/erd_diagram_en.md) |
+| Dictionnaire de données - colonnes des 3 tables Gold | [FR](docs/data_dictionary.md) | [EN](docs/data_dictionary_en.md) |
+| Justification des données synthétiques - méthode et validation KS-test | [FR](docs/synthetic_data_rationale.md) | [EN](docs/synthetic_data_rationale_en.md) |
 | Comparaison de modèles (généré automatiquement par `ml/comparison.py`) | [FR](docs/model_comparison.md) | [EN](docs/model_comparison_en.md) |
 | Journal des décisions de design | [FR](docs/decisions.md) | [EN](docs/decisions_en.md) |
 
@@ -50,7 +50,7 @@ starter_dataset.xlsx (10 tables)
 Les 9 pages du dashboard partagent une identité visuelle unique (charte
 noir/orange Artefact) via des composants communs
 (`dashboard/components/ui.py` : bandeau de page, guide de lecture, en-têtes
-de section, cartes KPI à seuil RAG, alertes) — jamais de style ad hoc page
+de section, cartes KPI à seuil RAG, alertes) - jamais de style ad hoc page
 par page.
 
 ## Installation
@@ -103,7 +103,7 @@ Sur volume > 10 Go → migrer vers BigQuery en changeant `profiles.yml`
 uniquement (voir `docs/architecture.md`).
 
 **L'AUC du modèle en production est-il fiable ?**
-Sur données réelles (n=140, 35 positifs) : 0,913, indicatif uniquement —
+Sur données réelles (n=140, 35 positifs) : 0,913, indicatif uniquement -
 échantillon trop petit pour généraliser. Sur données enrichies (n=540) :
 0,944, plus robuste. Ce n'est pas le meilleur score du comparatif
 (RandomForest et XGBoost atteignent 1,0) : je n'ai pas retenu ces deux
@@ -136,7 +136,7 @@ l'onglet Administration du dashboard (mot de passe requis, voir
 Le pipeline complet se rejoue (ingestion → dbt → ML, ~55 secondes mesurées),
 le résultat est immédiatement visible sur cette instance, puis sauvegardé
 dans un bucket Google Cloud Storage privé pour survivre aux redémarrages et
-être repris par toutes les instances — dashboard et serveur MCP (Assistant
+être repris par toutes les instances - dashboard et serveur MCP (Assistant
 IA) inclus, ce dernier étant explicitement resynchronisé juste après.
 Aucune action supplémentaire n'est nécessaire (pas de remplacement de
 fichier dans le dépôt, pas de reconstruction d'image). Détail du mécanisme,
