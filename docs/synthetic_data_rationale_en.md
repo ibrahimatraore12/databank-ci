@@ -1,69 +1,82 @@
-# Synthetic Data Rationale - dataBank CI Customer 360
+# Synthetic Data Explanation - dataBank CI Customer 360
 
 > *[French version: [synthetic_data_rationale.md](synthetic_data_rationale.md)]*
 
 **Author:** Ibrahima TRAORÉ - Analytics Engineer
 **Date:** July 2026
 
-## 1. Why generate synthetic data
+## 1. Why generate synthetic (artificial) data
 
-The real portfolio has 140 customers, 35 positives (25.0%) on the enriched
-proxy label (see `docs/ml_problem_definition_en.md`, section 5). That's too
-small to compare several supervised models with a reliable train/test split:
-`ml/model.py::evaluate_model` actually raises an explicit warning when
-`n < 200` or when positives are `< 20`, which happens systematically on the
-real dataset alone.
+The real portfolio has 140 customers, 35 of whom count as "disengaged"
+under the enriched approximate indicator (see
+`docs/ml_problem_definition_en.md`, section 5), or 25.0%. That's too few
+to reliably compare several Machine Learning models with a solid
+training/test split. The `ml/model.py::evaluate_model` function actually
+shows an automatic warning whenever the total number of customers is
+below 200, or the number of affected cases is below 20 - which happens
+systematically with the real data alone.
 
-I chose to generate 400 synthetic customers (`config.SYNTHETIC_N_CUSTOMERS`)
-to bring the total volume to 540, rather than present unreliable ML metrics
-on a 140-customer sample.
+So I chose to generate 400 synthetic customers
+(`config.SYNTHETIC_N_CUSTOMERS`) to bring the total volume to 540
+customers, rather than present unreliable Machine Learning results
+computed on only 140 customers.
 
-## 2. Method: business bootstrap, not random generation
+## 2. The method used: repetition based on business rules, not pure chance
 
-`src/synthetic_data_generator.py::generate_synthetic_customers()` doesn't
-draw random values out of thin air. The method:
+The `src/synthetic_data_generator.py::generate_synthetic_customers()`
+function doesn't pull random values with no logic behind them. Here is
+the method, step by step:
 
-1. **Sampling with replacement** of real customers as templates
-   (`_tirer_clients_source`, `rng.choice` with `seed=42`).
-2. **Copying and remapping** the customer and all of their linked tables
-   (accounts, cards, loans, transactions, complaints, interactions, offers)
-   under a new identifier `SYN-0001`, `SYN-0002`, etc. - relationships
-   between tables (`account_id`, `customer_id`) stay consistent after
-   remapping (`_remapper_comptes`, `_remapper_avec_compte`,
-   `_remapper_table_client`).
-3. **Controlled disengagement injection** on a sub-sample
-   (`churn_rate=0.10`, i.e. ~40 synthetic customers): their transactions are
-   shifted 180 days into the past (`_injecter_desengagement`), simulating
-   recent inactivity without inventing a new behavior pattern.
-4. **Two tables stay non-synthesized**: `Branches` and `Channels` are shared
-   reference data (no customer concept), so they're reused as-is.
+1. **Selection with possible repetition** of real customers, used as
+   starting templates (`_tirer_clients_source`, with a random draw fixed
+   by `seed=42` so the exact same result can be reproduced).
+2. **Copying and re-identifying** the customer and all their linked
+   information (accounts, cards, loans, transactions, complaints,
+   interactions, offers), under a new identifier: `SYN-0001`, `SYN-0002`,
+   etc. The links between tables (`account_id`, `customer_id`) stay
+   consistent after this change (`_remapper_comptes`,
+   `_remapper_avec_compte`, `_remapper_table_client`).
+3. **Controlled addition of disengagement signs** on part of the
+   generated customers (`churn_rate=0.10`, about 40 synthetic customers):
+   their transactions are shifted 180 days into the past
+   (`_injecter_desengagement`), simulating recent inactivity, without
+   inventing a new type of behavior.
+4. **Two tables are never artificially generated**: `Branches` and
+   `Channels` are shared reference data, with no direct link to a
+   specific customer. They are reused as-is.
 
-Every produced row carries `is_synthetic=True` from the Bronze layer onward
-(`bronze_synthetic_customers`, etc.), a flag that flows through every dbt
-layer up to `customer_360.is_synthetic` and is never hidden in the
+Every generated row carries the `is_synthetic=True` flag from the Bronze
+stage onward (`bronze_synthetic_customers`, etc.). This flag follows the
+data through every dbt transformation stage, all the way to the
+`customer_360.is_synthetic` column, and it is never hidden in the
 dashboard.
 
-## 3. Statistical validation: Kolmogorov-Smirnov test
+## 3. A statistical check: the Kolmogorov-Smirnov test
 
-Generating data that "looks like" real data isn't proof by itself.
-`_valider_distributions_ks()` compares the real and synthetic distribution of
-monthly income (`monthly_income_xof`) with a two-sample KS test
-(`scipy.stats.ks_2samp`): if the p-value falls below 0.05, an error log is
-emitted (`[SYNTHETIC][KS-TEST] distribution divergente`) - generation isn't
-automatically blocked on this failure, but the discrepancy is logged and
-inspectable in `logs/pipeline.log`, not hidden.
+Generating data that "looks like" real data isn't enough on its own: it
+needs to be checked with a statistical method. The
+`_valider_distributions_ks()` function compares the spread of real and
+synthetic monthly incomes (`monthly_income_xof`) using a statistical test
+called the "Kolmogorov-Smirnov test" (the `scipy.stats.ks_2samp`
+function), which checks whether two groups of data follow the same
+overall pattern. If the test result (the "p-value") drops below 0.05, an
+error message is logged (`[SYNTHETIC][KS-TEST] distribution divergente`).
+Data generation isn't automatically blocked in that case, but the
+discrepancy is logged and can be checked in `logs/pipeline.log`: nothing
+is hidden.
 
 ## 4. What this method cannot do
 
-- **It cannot invent new correlations** that the real world doesn't confirm:
-  a synthetic customer remains, by construction, a copy of a real customer
-  under a new identifier. Models trained on this enriched dataset can
-  therefore memorize patterns specific to their source customer rather than
-  learn true generalization - see `docs/model_comparison_en.md` for the
-  concrete effect of this risk on the RandomForest/XGBoost scores.
-- **It never replaces real data** in the dashboard's default operational
-  views - the `is_synthetic` flag exists precisely to never confuse the two
-  (see `docs/decisions_en.md`).
-- **The injected disengagement rate (10%) is a chosen parameter**, not a
-  measurement: it aims to produce enough positive volume for training, not
-  to reflect an observed real churn rate.
+- **It cannot invent new relationships between data points** that the
+  real world doesn't confirm: a synthetic customer remains, by
+  construction, a copy of a real customer with a new identifier. Models
+  trained on this enriched dataset can therefore "memorize" details
+  specific to their source customer, instead of learning a general trend
+  that holds for everyone. See `docs/model_comparison_en.md` to see the
+  concrete effect of this risk on the RandomForest and XGBoost scores.
+- **It never replaces real data** in the dashboard's default views: the
+  `is_synthetic` flag exists precisely so the two types of data are never
+  mixed up (see `docs/decisions_en.md`).
+- **The added disengagement rate (10%) is a choice**, not a real
+  measurement: it only aims to create enough "positive" cases to train a
+  model, not to reflect an actually observed customer departure rate.
