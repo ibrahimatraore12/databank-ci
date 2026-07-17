@@ -82,11 +82,11 @@ section[data-testid="stSidebar"] .stRadio label:hover { color: #FF4500 !importan
 
 .page-banner {
     background: linear-gradient(135deg, #0D0D0D 0%, #1A1A1A 100%);
-    color: #FFFFFF; padding: 20px 24px; border-radius: 8px;
-    margin-bottom: 20px; border-left: 5px solid #FF4500;
+    color: #FFFFFF; padding: 26px 24px; border-radius: 8px;
+    margin-bottom: 20px; border-left: 5px solid #FF4500; text-align: center;
 }
-.page-banner h1 { margin: 0 0 4px 0; font-size: 22px; font-weight: 700; color: #FFFFFF; }
-.page-banner p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.7); }
+.page-banner h1 { margin: 0 0 6px 0; font-size: 32px; font-weight: 700; color: #FFFFFF; }
+.page-banner p { margin: 0; font-size: 14px; color: rgba(255,255,255,0.7); }
 
 .guide-box {
     background: #F8F8F8; border: 1px solid #E0E0E0; border-radius: 8px;

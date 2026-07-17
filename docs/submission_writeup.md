@@ -73,6 +73,17 @@ ajouté un garde-fou de version de schéma après avoir identifié, en revue de
 conception, qu'un futur changement de schéma dbt pourrait sinon se faire
 silencieusement écraser par une ancienne donnée restaurée depuis GCS.
 
+**J'ai appliqué une identité visuelle unique aux 9 pages du dashboard**
+(charte noir/orange, composants communs dans `dashboard/components/ui.py` :
+bandeau, guide de lecture, en-têtes de section, cartes KPI à seuil RAG,
+alertes) plutôt qu'un style ad hoc par page, pour que le dashboard se lise
+comme un seul outil cohérent. J'ai gardé la palette de couleurs de segment
+déjà validée plutôt que les couleurs initialement proposées pour la charte,
+après avoir constaté que deux d'entre elles étaient trop proches pour un
+daltonien. Chaque page d'alerte montre aussi un signal positif réel
+(portefeuille sain, opportunités identifiées), pas seulement des risques —
+voir `docs/decisions.md` pour le détail de ces choix.
+
 ## 3. Une conclusion d'analyse, pas une suggestion générique
 
 Sur le portefeuille réel (hors clients synthétiques, pour ne pas présenter

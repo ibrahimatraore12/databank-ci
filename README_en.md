@@ -42,10 +42,16 @@ starter_dataset.xlsx (10 tables)
         ▼
    dbt_project/models/marts        (Gold: customer_360, customer_segments, nba)
         │
-        ├──► dashboard/  (Streamlit, 8 pages, FR/EN)
+        ├──► dashboard/  (Streamlit, 9 pages, FR/EN)
         ├──► mcp_server/ (MCP server, 5 read-only tools)
         └──► ml/         (rule-based score + compared ML models)
 ```
+
+The dashboard's 9 pages share a single visual identity (black/orange
+Artefact charte) through common components
+(`dashboard/components/ui.py`: page banner, reading guide, section
+headers, RAG-thresholded KPI cards, alerts) — never ad hoc styling per
+page.
 
 ## Installation
 
@@ -146,7 +152,7 @@ databank-ci/
 ├── src/                  ingestion, validation, lineage, enrichment
 ├── dbt_project/          staging / intermediate / marts / semantic
 ├── ml/                   business rules, data, models, comparison
-├── dashboard/            Streamlit app (8 pages, FR/EN i18n)
+├── dashboard/            Streamlit app (9 pages, FR/EN i18n)
 ├── mcp_server/            MCP server (5 read-only tools)
 ├── pipelines/            orchestration (data, ML)
 ├── scripts/              deployment

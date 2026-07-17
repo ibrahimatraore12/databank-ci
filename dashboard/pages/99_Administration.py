@@ -148,6 +148,10 @@ def valider_fichier_uploade(fichier) -> list:
 
 
 def _sauvegarder_avant_recalcul() -> dict:
+    # Copie chaque fichier protégé avant le recalcul, pour pouvoir revenir en
+    # arrière si le pipeline échoue en cours de route
+    # Copies each protected file before the recompute, so it can be rolled
+    # back if the pipeline fails partway
     sauvegardes = {}
     for chemin in FICHIERS_PROTEGES_AVANT_RECALCUL:
         if os.path.exists(chemin):
@@ -158,6 +162,10 @@ def _sauvegarder_avant_recalcul() -> dict:
 
 
 def _restaurer_et_nettoyer(sauvegardes: dict, restaurer: bool) -> None:
+    # Restaure les fichiers sauvegardés si le recalcul a échoué, puis
+    # supprime les copies de sauvegarde dans tous les cas
+    # Restores the backed-up files if the recompute failed, then removes
+    # the backup copies in all cases
     for chemin, chemin_backup in sauvegardes.items():
         if restaurer:
             shutil.copy2(chemin_backup, chemin)

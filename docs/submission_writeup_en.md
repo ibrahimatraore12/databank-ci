@@ -70,6 +70,17 @@ added a schema-version guard after identifying, during design review, that
 a future dbt schema change could otherwise get silently overwritten by
 older data restored from GCS.
 
+**I applied a single visual identity across the dashboard's 9 pages**
+(black/orange charte, shared components in `dashboard/components/ui.py`:
+banner, reading guide, section headers, RAG-thresholded KPI cards, alerts)
+instead of ad hoc per-page styling, so the dashboard reads as one coherent
+tool. I kept the already-validated segment color palette instead of the
+colors initially proposed for the charte, after finding two of them were
+too close for color-vision-deficient users. Every alert-bearing page also
+shows a real positive signal (healthy portfolio, identified opportunities),
+not just risks — see `docs/decisions_en.md` for the detail behind these
+choices.
+
 ## 3. An analytical conclusion, not a generic suggestion
 
 On the real portfolio (excluding synthetic customers, to avoid presenting a
