@@ -2,12 +2,12 @@
 
 > *[English version: [model_comparison_en.md](model_comparison_en.md)]*
 
-**Généré automatiquement par `ml/comparison.py` - ne pas éditer à la main.**
+**Ce fichier est généré automatiquement par `ml/comparison.py`. Ne pas le modifier à la main : les changements seraient écrasés au prochain calcul.**
 
-- Scénario A : 140 clients réels, 35 positifs (25.0 %)
-- Scénario B : 540 clients réels + synthétiques, 151 positifs (28.0 %)
+- Scénario A (données réelles seulement) : 140 clients, 35 considérés à risque (25.0 %)
+- Scénario B (données réelles + synthétiques) : 540 clients, 151 considérés à risque (28.0 %)
 
-## Résultats (validation croisée stratifiée à 5 plis)
+## Résultats (validation croisée : les données sont découpées en 5 groupes, chaque groupe sert une fois de test)
 
 | scenario           | modele                 |   auc |   recall |   precision |    f1 |
 |:-------------------|:-----------------------|------:|---------:|------------:|------:|
@@ -17,8 +17,10 @@
 | B (n=540 enrichis) | RandomForestClassifier | 1     |    0.987 |       1     | 0.993 |
 | B (n=540 enrichis) | XGBClassifier          | 1     |    1     |       1     | 1     |
 
-## Lecture
+Repère de lecture des colonnes : `auc` (qualité générale de prédiction, entre 0 et 1, plus c'est proche de 1 mieux c'est), `recall` (part des clients à risque bien repérés par le modèle), `precision` (part des alertes du modèle qui étaient justes), `f1` (moyenne équilibrée entre recall et precision).
 
-Ces métriques restent indicatives : voir `docs/ml_problem_definition.md` pour les limites du label proxy utilisé et les avertissements sur la taille d'échantillon.
+## Comment lire ces résultats
 
-**Sur les scores quasi parfaits du Scénario B (RandomForest, XGBoost) :** les clients synthétiques sont générés par bootstrap métier à partir des clients réels (voir `src/synthetic_data_generator.py`), donc statistiquement très proches de leur client source. Un modèle capacitaire (forêt, boosting) peut mémoriser ces motifs facilement - ces scores élevés reflètent la facilité du jeu synthétique, pas une garantie de performance en production sur des clients inédits.
+Ces chiffres restent indicatifs. Voir `docs/ml_problem_definition.md` pour comprendre les limites de l'indicateur de risque utilisé et les avertissements sur la petite taille de l'échantillon.
+
+**À propos des scores quasi parfaits du Scénario B (RandomForest, XGBoost) :** les clients synthétiques sont générés à partir de clients réels, par une méthode de répétition basée sur des règles métier (voir `src/synthetic_data_generator.py`). Ils restent donc statistiquement très proches de leur client d'origine. Un modèle puissant (forêt aléatoire, boosting) peut facilement "apprendre par cœur" ces ressemblances. Ces scores élevés montrent seulement que le jeu de données synthétique est facile à prédire pour ces modèles, pas qu'ils fonctionneraient aussi bien en production sur de nouveaux clients jamais vus.
