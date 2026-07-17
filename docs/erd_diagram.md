@@ -1,14 +1,17 @@
-# Diagramme ERD - dataBank CI Customer 360
+# Schéma des données (ERD) - dataBank CI Customer 360
 
 > *[English version: [erd_diagram_en.md](erd_diagram_en.md)]*
 
 **Auteur :** Ibrahima TRAORÉ - Analytics Engineer
 **Date :** Juillet 2026
 
-Ce diagramme couvre le schéma de la couche staging (`dbt_project/models/staging/`),
-un modèle par table source, chacun à la grain de sa table brute. `customer_id`
-est la clé qui relie tout le portefeuille ; `account_id` et `channel_id` sont
-les deux autres clés de jointure utilisées par les modèles intermediate.
+Ce diagramme montre comment les 10 tables sources sont reliées entre elles,
+au niveau de l'étape "staging" (`dbt_project/models/staging/`) : un modèle
+par table source, chacun gardant le même niveau de détail ("grain") que la
+table brute d'origine. `customer_id` (identifiant client) est la clé qui
+relie tout le portefeuille de clients. `account_id` (identifiant de compte)
+et `channel_id` (identifiant de canal) sont les deux autres clés utilisées
+pour relier les tables entre elles dans les modèles "intermediate".
 
 ## 1. Schéma relationnel
 
@@ -95,30 +98,38 @@ erDiagram
     }
 ```
 
-## 2. Grain de chaque table
+Note de lecture : `PK` signifie "clé primaire" (l'identifiant unique de
+chaque ligne de la table). `FK` signifie "clé étrangère" (une colonne qui
+pointe vers l'identifiant d'une autre table, pour créer le lien entre les
+deux).
 
-| Table | Grain | Modèle staging |
+## 2. Niveau de détail de chaque table
+
+| Table | Niveau de détail (une ligne =) | Modèle staging correspondant |
 |-------|-------|-----------------|
-| Customers | 1 ligne / client | `stg_customers.sql` |
-| Accounts | 1 ligne / compte (un client peut en avoir plusieurs) | `stg_accounts.sql` |
-| Transactions | 1 ligne / transaction | `stg_transactions.sql` |
-| Loans | 1 ligne / prêt | `stg_loans.sql` |
-| Cards | 1 ligne / carte | `stg_cards.sql` |
-| Complaints | 1 ligne / réclamation | `stg_complaints.sql` |
-| Interactions | 1 ligne / interaction conseiller | `stg_interactions.sql` |
-| Offers | 1 ligne / offre proposée | `stg_offers.sql` |
-| Branches | 1 ligne / agence (référentiel, réel uniquement) | `stg_branches.sql` |
-| Channels | 1 ligne / canal (référentiel, réel uniquement) | `stg_channels.sql` |
+| Customers (clients) | 1 client | `stg_customers.sql` |
+| Accounts (comptes) | 1 compte (un client peut avoir plusieurs comptes) | `stg_accounts.sql` |
+| Transactions | 1 transaction | `stg_transactions.sql` |
+| Loans (prêts) | 1 prêt | `stg_loans.sql` |
+| Cards (cartes) | 1 carte | `stg_cards.sql` |
+| Complaints (réclamations) | 1 réclamation | `stg_complaints.sql` |
+| Interactions | 1 échange avec un conseiller | `stg_interactions.sql` |
+| Offers (offres) | 1 offre proposée à un client | `stg_offers.sql` |
+| Branches (agences) | 1 agence (donnée de référence, réelle uniquement) | `stg_branches.sql` |
+| Channels (canaux) | 1 canal de contact (donnée de référence, réelle uniquement) | `stg_channels.sql` |
 
-Deux tables (`Branches`, `Channels`) sont des référentiels : elles n'ont pas
-de contrepartie synthétique dans `_sources.yml`, contrairement aux 8 autres
-qui ont chacune une table `bronze_synthetic_*` fusionnée en Bronze.
+Deux tables (`Branches` et `Channels`) sont des données de référence
+fixes : elles n'ont pas de version synthétique dans `_sources.yml`,
+contrairement aux 8 autres tables, qui possèdent chacune une table
+`bronze_synthetic_*` associée, fusionnée dès l'étape Bronze.
 
-## 3. Comment ce schéma devient `customer_360`
+## 3. Comment ce schéma devient la table finale `customer_360`
 
-Toutes les tables au grain "transaction/compte/prêt" sont agrégées à la
-grain client dans `dbt_project/models/intermediate/` (un modèle par concern :
-récence, tendance, réclamations, score digital, produits, solde, NBI, canal,
-prêts), puis jointes en une seule ligne par client dans
-`dbt_project/models/marts/customer_360.sql` - voir `docs/data_dictionary.md`
-pour le détail colonne par colonne de ce mart.
+Toutes les tables détaillées au niveau "transaction / compte / prêt" sont
+d'abord regroupées au niveau "client" dans
+`dbt_project/models/intermediate/` (un modèle par sujet : récence,
+tendance, réclamations, score numérique, produits, solde, revenu généré,
+canal, prêts). Elles sont ensuite réunies en une seule ligne par client
+dans `dbt_project/models/marts/customer_360.sql`. Le détail de chaque
+colonne de cette table finale est expliqué dans
+`docs/data_dictionary.md`.
