@@ -7,54 +7,61 @@
 
 ## 1. Contexte
 
-dataBank CI est une banque de détail opérant en Côte d'Ivoire (zone UEMOA,
-devise XOF). Le portefeuille source couvre 140 clients répartis sur 4
-segments (Mass, Affluent, Premier, Youth), avec comptes, prêts, cartes,
-transactions, interactions et réclamations.
+dataBank CI est une banque de détail qui opère en Côte d'Ivoire (zone UEMOA,
+devise XOF). Le fichier source couvre 140 clients, répartis en 4 groupes
+appelés "segments" (Mass, Affluent, Premier, Youth). Pour chaque client, on
+dispose de ses comptes, prêts, cartes, transactions, échanges avec la
+banque et réclamations.
 
-## 2. Cinq décisions métier que ce projet doit soutenir
+## 2. Cinq décisions métier que ce projet doit aider à prendre
 
-1. **Priorisation des visites conseillers** - quels clients contacter en
-   premier cette semaine parmi ceux qui montrent des signaux de
-   désengagement ?
-2. **Ciblage cross-sell** - quels clients détenant peu de produits (ex : les
-   42 clients sans carte) sont de bons candidats pour une offre ciblée ?
-3. **Traitement prioritaire des réclamations** - quelles réclamations
-   ouvertes doivent être escaladées en priorité selon la sévérité et
-   l'impact potentiel sur la rétention ?
-4. **Upsell salaire domicilié** - quels clients à fort revenu mensuel n'ont
-   pas encore domicilié leur salaire chez dataBank CI ?
-5. **Surveillance du risque crédit** - quels emprunteurs approchent d'un
-   dépassement de délai de paiement (seuil 15 jours) et nécessitent un suivi
-   avant escalade en `Watchlist` ou `Delinquent` ?
+1. **Priorisation des visites conseillers** - parmi les clients qui montrent
+   des signes de désengagement, lesquels contacter en premier cette
+   semaine ?
+2. **Ciblage pour la vente croisée (cross-sell)** - parmi les clients qui
+   détiennent peu de produits (par exemple les 42 clients sans carte),
+   lesquels sont de bons candidats pour recevoir une offre ciblée ?
+3. **Traitement prioritaire des réclamations** - parmi les réclamations
+   ouvertes, lesquelles faire remonter en priorité, selon leur gravité et
+   leur impact possible sur la fidélité du client ?
+4. **Proposition de domiciliation de salaire** - quels clients à revenu
+   mensuel élevé n'ont pas encore choisi de recevoir leur salaire chez
+   dataBank CI ?
+5. **Surveillance du risque de crédit** - quels emprunteurs approchent d'un
+   retard de paiement (seuil de 15 jours) et ont besoin d'un suivi avant
+   d'être classés `Watchlist` (à surveiller) ou `Delinquent` (en défaut) ?
 
-## 3. KPIs guide par segment
+## 3. Indicateurs clés (KPI) à suivre par segment
 
-| Segment | KPI prioritaire | Pourquoi |
+| Segment | Indicateur prioritaire | Pourquoi |
 |---------|------------------|----------|
-| Mass | Taux d'activation digitale, réclamations en cours | Volume important (84 clients), sensible au coût de service |
-| Affluent | Solde moyen 90 jours, nombre de produits détenus | Potentiel de cross-sell le plus élevé |
-| Premier | NBI estimé, réclamations sévérité haute | Portefeuille à forte valeur, faible tolérance à l'insatisfaction |
-| Youth | Application mobile activée, offres acceptées | Segment digital natif, KPI d'engagement plutôt que de solde |
+| Mass | Taux d'activation des services numériques, réclamations en cours | Segment le plus nombreux (84 clients), coût de service à surveiller |
+| Affluent | Solde moyen sur 90 jours, nombre de produits détenus | Potentiel de vente croisée le plus élevé |
+| Premier | Revenu généré par client (NBI, estimé), réclamations graves | Clients à forte valeur, faible tolérance à l'insatisfaction |
+| Youth | Application mobile activée, offres acceptées | Segment habitué au numérique, on suit l'engagement plutôt que le solde |
 
-KPIs transverses suivis dans le dashboard : nombre de clients à risque,
-taux de conversion des offres, délai moyen de résolution des réclamations,
-proportion de clients avec salaire domicilié.
+Indicateurs suivis pour tous les segments dans le tableau de bord : nombre
+de clients à risque, taux d'acceptation des offres, délai moyen de
+résolution des réclamations, proportion de clients ayant domicilié leur
+salaire.
 
-## 4. Ce qui manque pour un Customer 360 production réel
+## 4. Ce qu'il manquerait pour un vrai outil Customer 360 en production
 
-- **Consentement RGPD/local et gouvernance des données** : aucun mécanisme de
-  consentement granulaire par finalité n'est modélisé au-delà du champ
-  `marketing_opt_in`.
-- **Données temps réel** : le dataset est un extrait statique ; un Customer
-  360 réel nécessiterait un flux d'ingestion incrémental (CDC) plutôt qu'un
-  chargement complet.
-- **Scoring de fraude** : aucune donnée de détection de fraude transactionnelle
-  n'est disponible séparément du flag `is_disputed`.
-- **Historique multi-année** : la fenêtre de données (2024-02 à 2025-12)
-  est courte pour des analyses de tendance robustes.
-- **Intégration bureau de crédit externe** et **NBI comptable réel** - voir
-  `docs/ml_problem_definition.md` section 4.
-- **Processus de validation humaine** avant toute action automatisée déclenchée
-  par le score (ce projet reste un outil d'aide à la décision, pas un moteur
-  de décision autonome).
+- **Consentement RGPD (protection des données personnelles) et gouvernance
+  des données** : aujourd'hui, il n'existe pas de mécanisme détaillé de
+  consentement par usage (marketing, partage, etc.), seulement un champ
+  simple `marketing_opt_in`.
+- **Données en temps réel** : le fichier utilisé est une photo figée à un
+  instant donné. Un vrai outil Customer 360 aurait besoin d'un flux de
+  mise à jour continue (appelé CDC, pour "Change Data Capture") plutôt que
+  d'un rechargement complet à chaque fois.
+- **Détection de fraude** : il n'existe pas de données dédiées à la
+  détection de fraude sur les transactions, en dehors du simple indicateur
+  `is_disputed` (transaction contestée).
+- **Historique sur plusieurs années** : la période couverte (février 2024 à
+  décembre 2025) est courte pour analyser des tendances de façon fiable.
+- **Connexion à un bureau de crédit externe** et **calcul du revenu réel du
+  client (NBI comptable)** - voir `docs/ml_problem_definition.md`, section 4.
+- **Étape de validation humaine** avant toute action automatique déclenchée
+  par un score. Ce projet reste un outil d'aide à la décision : il ne
+  prend jamais de décision seul.
