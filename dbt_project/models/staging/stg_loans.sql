@@ -1,7 +1,7 @@
 -- Nettoyage des prêts : typage explicite, fusion réel + synthétique, et
 -- correction du statut à partir du retard réel (days_past_due > seuil = Delinquent)
 -- Loan cleanup: explicit typing, merges real + synthetic, and corrects status
--- from the real days past due (days_past_due > threshold = Delinquent) — see docs/decisions.md
+-- from the real days past due (days_past_due > threshold = Delinquent) - see docs/decisions.md
 
 with union_reel_synthetique as (
     select * from {{ source('bronze', 'bronze_loans') }}

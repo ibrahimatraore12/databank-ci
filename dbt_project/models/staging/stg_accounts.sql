@@ -3,7 +3,7 @@
 -- (un compte non-flaggé qui reçoit un crédit "salary_credit" est en réalité domicilié)
 -- Account cleanup: explicit typing, merges real + synthetic, and corrects
 -- salary_domiciled_flag from observed transactions (an unflagged account that
--- receives a "salary_credit" is in fact salary-domiciled) — see docs/decisions.md
+-- receives a "salary_credit" is in fact salary-domiciled) - see docs/decisions.md
 
 with union_reel_synthetique as (
     select * from {{ source('bronze', 'bronze_accounts') }}

@@ -135,11 +135,11 @@ select
     -- Classe ontologique 3 : réclamation ouverte et activité transactionnelle en baisse
     -- Ontology class 3: open complaint and declining transaction activity
     (nb_reclamations_ouvertes > 0 and recency_jours > 60) as is_complaints_churn_risk,
-    -- Classe ontologique 4 : client sans carte bancaire — cible cross-sell
-    -- Ontology class 4: customer without a bank card — cross-sell target
+    -- Classe ontologique 4 : client sans carte bancaire - cible cross-sell
+    -- Ontology class 4: customer without a bank card - cross-sell target
     (nb_cartes = 0) as is_cross_sell_target,
-    -- Classe ontologique 5 : revenu élevé sans domiciliation de salaire — opportunité upsell
-    -- Ontology class 5: high income without salary domiciliation — upsell opportunity
+    -- Classe ontologique 5 : revenu élevé sans domiciliation de salaire - opportunité upsell
+    -- Ontology class 5: high income without salary domiciliation - upsell opportunity
     (not salaire_domicilie and monthly_income_xof >= {{ var('salary_upsell_income_threshold_xof') }}) as is_salary_upsell_opportunity,
     is_synthetic,
     current_timestamp as updated_at

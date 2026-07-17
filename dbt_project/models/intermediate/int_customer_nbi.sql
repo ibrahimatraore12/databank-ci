@@ -1,8 +1,8 @@
--- NBI estimé (formule UEMOA standard, voir docs/decisions.md) — porte à
+-- NBI estimé (formule UEMOA standard, voir docs/decisions.md) - porte à
 -- l'identique la formule déjà documentée et testée dans
 -- src/data_enrichment.py::generate_nbi_estime() : ce n'est PAS le NBI
 -- comptable réel du client
--- Estimated NBI (standard UEMOA formula, see docs/decisions.md) — mirrors
+-- Estimated NBI (standard UEMOA formula, see docs/decisions.md) - mirrors
 -- exactly the formula already documented and tested in
 -- src/data_enrichment.py::generate_nbi_estime(): NOT the customer's real
 -- accounting NBI

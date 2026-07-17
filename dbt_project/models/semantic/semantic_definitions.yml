@@ -26,25 +26,25 @@ semantic_models:
       - name: is_high_value_at_risk
         type: categorical
         description: >
-          Concept 1 — Client à forte valeur (Premier ou Affluent) montrant des
+          Concept 1 - Client à forte valeur (Premier ou Affluent) montrant des
           signaux précoces de désengagement (recency > 60 jours)
       - name: is_digitally_dormant_salary
         type: categorical
         description: >
-          Concept 2 — Client au salaire domicilié mais quasiment absent des
+          Concept 2 - Client au salaire domicilié mais quasiment absent des
           canaux digitaux (score digital <= 1 sur 3)
       - name: is_complaints_churn_risk
         type: categorical
         description: >
-          Concept 3 — Client avec une réclamation ouverte et une activité
+          Concept 3 - Client avec une réclamation ouverte et une activité
           transactionnelle en baisse
       - name: is_cross_sell_target
         type: categorical
-        description: "Concept 4 — Client sans carte bancaire, cible prioritaire de cross-sell"
+        description: "Concept 4 - Client sans carte bancaire, cible prioritaire de cross-sell"
       - name: is_salary_upsell_opportunity
         type: categorical
         description: >
-          Concept 5 — Client à revenu mensuel élevé dont le salaire n'est pas
+          Concept 5 - Client à revenu mensuel élevé dont le salaire n'est pas
           domicilié chez dataBank CI
       - name: updated_at
         type: time

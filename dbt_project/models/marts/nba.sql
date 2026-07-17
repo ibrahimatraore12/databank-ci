@@ -7,8 +7,8 @@ select
     customer_id,
     segment,
     case
-        when is_complaints_churn_risk then 'Contacter en priorité — réclamation ouverte et activité en baisse'
-        when is_high_value_at_risk then 'Visite conseiller — client à forte valeur en risque de désengagement'
+        when is_complaints_churn_risk then 'Contacter en priorité - réclamation ouverte et activité en baisse'
+        when is_high_value_at_risk then 'Visite conseiller - client à forte valeur en risque de désengagement'
         when is_salary_upsell_opportunity then 'Proposer la domiciliation de salaire'
         when is_cross_sell_target then 'Proposer une carte bancaire'
         when is_digitally_dormant_salary then 'Relancer sur les canaux digitaux'

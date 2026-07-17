@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: bronze
     schema: main
-    description: Couche Bronze — données brutes chargées depuis starter_dataset.xlsx et le générateur synthétique
+    description: Couche Bronze - données brutes chargées depuis starter_dataset.xlsx et le générateur synthétique
     tables:
       - name: bronze_customers
       - name: bronze_synthetic_customers

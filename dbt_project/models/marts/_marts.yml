@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: customer_360
-    description: Table Gold Customer 360 — vue unique du client, risque composite et 5 classes ontologiques
+    description: Table Gold Customer 360 - vue unique du client, risque composite et 5 classes ontologiques
     columns:
       - name: customer_id
         tests: [unique, not_null]
