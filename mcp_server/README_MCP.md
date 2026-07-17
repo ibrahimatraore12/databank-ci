@@ -2,27 +2,31 @@
 
 > *[English version: [README_MCP_en.md](README_MCP_en.md)]*
 
-Serveur MCP (Model Context Protocol) exposant 5 outils en lecture seule sur
-le portefeuille dataBank CI. Toute connexion DuckDB ouverte par les outils
-est `read_only=True` - aucune écriture n'est possible depuis ce serveur.
+Un serveur MCP (Model Context Protocol) est un programme qui permet à un
+assistant en langage naturel de poser des questions à une source de
+données, ici le portefeuille de clients dataBank CI. Ce serveur propose 5
+outils, tous en lecture seule : aucune écriture n'est possible depuis ce
+serveur. Chaque connexion à DuckDB qu'il ouvre utilise l'option
+`read_only=True`.
 
-## Outils exposés
+## Les outils disponibles
 
-| Outil | Description | Paramètres |
+| Outil | Ce qu'il fait | Paramètres |
 |-------|-------------|------------|
-| `outil_clients_a_risque` | Clients les plus à risque de désengagement | `segment` (optionnel), `limit` (défaut 10) |
-| `outil_profil_client` | Fiche complète d'un client | `customer_id` (obligatoire) |
-| `outil_candidats_cross_sell` | Clients cibles de cross-sell / upsell salaire | `offer_type` (optionnel), `limit` (défaut 10) |
-| `outil_kpis_portefeuille` | KPIs agrégés du portefeuille | `segment` (optionnel) |
-| `outil_analyse_reclamations` | Analyse des réclamations par sévérité et statut | `category` (optionnel) |
+| `outil_clients_a_risque` | Liste les clients les plus à risque de désengagement | `segment` (facultatif), `limit` (10 par défaut) |
+| `outil_profil_client` | Donne la fiche complète d'un client | `customer_id` (obligatoire) |
+| `outil_candidats_cross_sell` | Liste les clients ciblés pour une vente croisée ou une proposition de domiciliation de salaire | `offer_type` (facultatif), `limit` (10 par défaut) |
+| `outil_kpis_portefeuille` | Donne les indicateurs clés agrégés du portefeuille | `segment` (facultatif) |
+| `outil_analyse_reclamations` | Analyse les réclamations par gravité et par statut | `category` (facultatif) |
 
-La logique métier de chaque outil vit dans `mcp_server/tools/customers.py`,
-`mcp_server/tools/portfolio.py` et `mcp_server/tools/complaints.py`. La page
-`dashboard/pages/07_Assistant_IA.py` n'importe plus ces modules directement :
-elle appelle le serveur MCP déployé via `dashboard/components/mcp_client.py`,
-en HTTP (transport `streamable-http`), pour que les réponses passent
-réellement par le protocole MCP plutôt que par un appel de fonction en
-mémoire.
+La logique de calcul de chaque outil se trouve dans
+`mcp_server/tools/customers.py`, `mcp_server/tools/portfolio.py` et
+`mcp_server/tools/complaints.py`. La page
+`dashboard/pages/07_Assistant_IA.py` n'importe plus ces fichiers
+directement : elle appelle le serveur MCP en ligne via
+`dashboard/components/mcp_client.py`, par une vraie connexion HTTP
+(protocole `streamable-http`). Les réponses passent donc réellement par le
+protocole MCP, et non par un simple appel de fonction en mémoire.
 
 ## Lancer le serveur
 
@@ -32,18 +36,21 @@ pyenv activate databank-ci-env
 python3 mcp_server/databank_mcp_server.py
 ```
 
-Par défaut le serveur communique en stdio (protocole MCP standard) - il
-attend une connexion d'un client MCP (Claude Desktop, Claude Code, etc.).
-En production (Cloud Run), il tourne en `streamable-http` :
+Par défaut, le serveur communique via `stdio` (le mode de communication
+standard du protocole MCP) : il attend qu'un client MCP se connecte
+(Claude Desktop, Claude Code, etc., qui sont des exemples de logiciels
+compatibles avec ce protocole). En production (sur Cloud Run), il
+fonctionne en mode `streamable-http` :
 
 ```bash
 MCP_TRANSPORT=streamable-http MCP_API_KEY=<clé> PORT=8080 python3 mcp_server/databank_mcp_server.py
 ```
 
-Chaque requête HTTP doit alors porter l'en-tête `X-API-Key: <clé>` - voir
+Dans ce mode, chaque requête HTTP doit alors contenir l'en-tête
+`X-API-Key: <clé>` pour prouver qu'elle est autorisée. Voir la classe
 `ApiKeyMiddleware` dans `databank_mcp_server.py`.
 
-## Configuration client (exemple Claude Desktop, en local)
+## Configuration côté client (exemple avec Claude Desktop, en local)
 
 ```json
 {
@@ -56,29 +63,35 @@ Chaque requête HTTP doit alors porter l'en-tête `X-API-Key: <clé>` - voir
 }
 ```
 
-## Persistance des données et resynchronisation
+## Sauvegarde des données et remise à jour
 
-Ce serveur lit `dbt_project/databank_ci.duckdb` en lecture seule. Ce fichier
-n'est pas fixe : voir `src/storage_sync.py` et `docs/architecture.md` (section
-"Persistance des données") pour le mécanisme complet. En résumé :
+Ce serveur lit le fichier `dbt_project/databank_ci.duckdb` en lecture
+seule. Ce fichier n'est pas figé une fois pour toutes : voir
+`src/storage_sync.py` et la section "Comment les données sont conservées"
+de `docs/architecture.md` pour le fonctionnement complet. En résumé :
 
-- Au démarrage du processus, `telecharger_depuis_gcs()` est appelée une fois
-  (ligne 41 de `databank_mcp_server.py`) : si le bucket GCS contient une
-  version compatible (même `schema_version`), les fichiers locaux sont
-  remplacés par cette version avant que le serveur ne commence à répondre.
-- Une route interne `POST /admin/resync` (protégée par le même
-  `ApiKeyMiddleware` que le reste du transport HTTP) permet de redéclencher
-  ce téléchargement sans redémarrer le processus. C'est ce qu'appelle
+- Au démarrage du programme, la fonction `telecharger_depuis_gcs()` est
+  appelée une seule fois (ligne 41 de `databank_mcp_server.py`). Si
+  l'espace de stockage GCS contient une version compatible (même numéro de
+  version de schéma), les fichiers locaux sont remplacés par cette version
+  avant que le serveur ne commence à répondre aux questions.
+- Une route interne `POST /admin/resync` (protégée par la même
+  vérification `ApiKeyMiddleware` que le reste du serveur) permet de
+  redéclencher ce téléchargement sans avoir à redémarrer le programme.
+  C'est cette route qu'appelle
   `dashboard/components/mcp_client.py::resynchroniser_mcp()` juste après
-  qu'un recalcul déclenché depuis l'onglet Administration a été persisté
-  dans GCS - pour que les réponses de l'Assistant IA reflètent les données
-  fraîches sans attendre le prochain redémarrage naturel de ce service.
+  qu'un recalcul, lancé depuis l'onglet Administration, a été sauvegardé
+  dans GCS. Cela permet aux réponses de l'Assistant IA de refléter les
+  données les plus récentes, sans attendre le prochain redémarrage naturel
+  de ce service.
 
-## Note d'implémentation
+## Note technique
 
-Le dossier a été renommé `mcp_server/` (et non `mcp/`) précisément pour
-éviter toute collision avec le paquet Python `mcp` installé via
-`pip install mcp` (le SDK officiel) : le dashboard Streamlit ajoute la
-racine du projet à `sys.path`, et un dossier `mcp/` à la racine aurait
-shadowé le vrai SDK dès que le dashboard aurait tenté `import mcp` pour
-parler au serveur distant.
+Le dossier a été nommé `mcp_server/` (et non simplement `mcp/`) pour une
+raison précise : éviter toute confusion avec le paquet Python `mcp`
+installé via `pip install mcp` (le kit de développement officiel du
+protocole MCP). Le tableau de bord Streamlit ajoute le dossier racine du
+projet à son chemin de recherche Python (`sys.path`). Si le dossier
+s'était appelé `mcp/`, il aurait masqué le vrai paquet officiel dès que le
+tableau de bord aurait essayé de faire `import mcp` pour parler au serveur
+distant.
