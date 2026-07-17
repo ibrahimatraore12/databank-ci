@@ -161,8 +161,7 @@ databank-ci/
 
 ## Code rules
 
-- No object-oriented programming in business logic: functions only.
-- Bilingual comments (French then English) on non-obvious points.
+ - Bilingual comments (French then English) on non-obvious points.
 - Strict semantic layer: no technical column name in the dashboard, see
   `dashboard/components/ui.py::LABELS` and `dashboard/i18n/`.
 - Idempotence: `pipelines/run_pipeline.py` cleans its outputs before

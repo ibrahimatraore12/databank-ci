@@ -163,8 +163,7 @@ databank-ci/
 
 ## Règles de code
 
-- Aucune programmation orientée objet dans le code métier : uniquement des fonctions.
-- Commentaires bilingues (français puis anglais) sur les points non évidents.
+ - Commentaires bilingues (français puis anglais) sur les points non évidents.
 - Couche sémantique stricte : aucun nom de colonne technique dans le dashboard,
   voir `dashboard/components/ui.py::LABELS` et `dashboard/i18n/`.
 - Idempotence : `pipelines/run_pipeline.py` nettoie ses sorties avant de les
