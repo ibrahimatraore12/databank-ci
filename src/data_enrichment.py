@@ -62,8 +62,8 @@ def generate_nbi_estime(
     df_accounts: pd.DataFrame,
     df_transactions: pd.DataFrame,
 ) -> pd.DataFrame:
-    # NBI estimé par formule UEMOA standard — n'est PAS le NBI comptable réel du client
-    # Estimated NBI using the standard UEMOA formula — NOT the customer's real accounting NBI
+    # NBI estimé par formule UEMOA standard - n'est PAS le NBI comptable réel du client
+    # Estimated NBI using the standard UEMOA formula - NOT the customer's real accounting NBI
     solde_par_client = df_accounts.groupby("customer_id")["avg_balance_90d_xof"].sum()
     solde_par_client = solde_par_client.reindex(df_customers["customer_id"], fill_value=0)
 

@@ -1,5 +1,5 @@
-# Journalisation structurée du projet — 4 flux distincts avec rotation
-# Structured logging for the project — 4 separate flows with rotation
+# Journalisation structurée du projet - 4 flux distincts avec rotation
+# Structured logging for the project - 4 separate flows with rotation
 
 import logging
 import os

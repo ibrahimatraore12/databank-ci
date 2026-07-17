@@ -1,5 +1,5 @@
-# Traçabilité et lignage des données — met à jour lineage.json à chaque ingestion
-# Data traceability and lineage — updates lineage.json on every ingestion
+# Traçabilité et lignage des données - met à jour lineage.json à chaque ingestion
+# Data traceability and lineage - updates lineage.json on every ingestion
 
 import json
 import os

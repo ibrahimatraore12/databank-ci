@@ -1,7 +1,7 @@
-# Persistance des fichiers de données sur Google Cloud Storage — Cloud Run
+# Persistance des fichiers de données sur Google Cloud Storage - Cloud Run
 # n'a pas de disque persistant : un recalcul déclenché depuis l'onglet Admin
 # ne modifie que l'instance en cours sans cette couche de synchronisation
-# Data file persistence on Google Cloud Storage — Cloud Run has no
+# Data file persistence on Google Cloud Storage - Cloud Run has no
 # persistent disk: a recompute triggered from the Admin tab only affects the
 # current instance without this synchronization layer
 
@@ -98,7 +98,7 @@ def televerser_vers_gcs() -> None:
     # instance's restart and are picked up by every other one. Raises on failure, so the
     # caller can distinguish "local recompute OK" from "persistence failed"
     if not GCS_BUCKET_NAME:
-        raise RuntimeError("GCS_BUCKET_NAME n'est pas configuré — le recalcul reste local à cette instance.")
+        raise RuntimeError("GCS_BUCKET_NAME n'est pas configuré - le recalcul reste local à cette instance.")
 
     bucket = _client().bucket(GCS_BUCKET_NAME)
     for nom_objet, chemin_local in FICHIERS_SYNCHRONISES.items():
